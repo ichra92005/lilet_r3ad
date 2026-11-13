@@ -1,0 +1,17 @@
+{
+  "name": "lilet_r3ad",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "vite": "^8.3.6"
+  },
+  "dependencies": {
+    "@mlc-ai/web-llm": "^0.2.88"
+  }
+}
