@@ -32,10 +32,10 @@ const cursorSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24
 
 /* ── actions ───────────────────────────────────────────────────── */
 function goGetStarted() {
-  navigate("/dashboard");
+  navigate("/login");
 }
 function goGuest() {
-  navigate("/dashboard");
+  navigate("/login");
 }
 /* ── build ─────────────────────────────────────────────────────── */
 export function renderLanding(container) {
@@ -70,7 +70,7 @@ export function renderLanding(container) {
   navLinks.setAttribute("aria-label", "Primary navigation");
   for (const { label, action } of [
     { label: "Features", action: () => document.getElementById("features")?.scrollIntoView({ behavior: "smooth" }) },
-    { label: "Guest Space", action: goGuest },
+    { label: "Sign in", action: goGuest },
   ]) {
     const btn = h("button", "landing-nav-link", { text: label, type: "button" });
     btn.addEventListener("click", action);
@@ -231,7 +231,7 @@ stripActions.append(linkedIn, emailLink, contactBtn);
   const finalRight = h("div", "landing-final-right");
   const finalGetStarted = h("button", "landing-final-btn-white", { text: "Get Started", type: "button" });
   finalGetStarted.addEventListener("click", goGetStarted);
-  const finalGuest = h("button", "landing-final-btn-outline", { text: "Or continue as a guest – no account needed!", type: "button" });
+  const finalGuest = h("button", "landing-final-btn-outline", { text: "Already have an account? Sign in", type: "button" });
   finalGuest.addEventListener("click", goGuest);
   finalRight.append(finalGetStarted, finalGuest);
   finalCard.append(finalLeft, finalRight);
@@ -259,7 +259,7 @@ stripActions.append(linkedIn, emailLink, contactBtn);
   const footerCredit = h("p", "landing-footer-credit", { text: "Made with ♡ by Ichrak Nour Elhouda Belkhla" });
 
   const footerLinks = h("div", "landing-footer-links");
-  const fGuest = h("button", "landing-footer-link", { text: "Guest Space", type: "button" });
+  const fGuest = h("button", "landing-footer-link", { text: "Sign in", type: "button" });
   fGuest.addEventListener("click", goGuest);
   footerLinks.appendChild(fGuest);
 

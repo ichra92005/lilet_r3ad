@@ -12,10 +12,16 @@
 
 import { STORAGE_KEY_GENERATED } from "../app/config.js";
 import { splitSentences } from "../document/structure.js";
+import { getCurrentUser } from "../lib/authProvider.js";
+
+function _cacheKey() {
+  const userId = getCurrentUser()?.id;
+  return userId ? `${STORAGE_KEY_GENERATED}:${userId}` : STORAGE_KEY_GENERATED;
+}
 
 function _loadCache() {
   try {
-    return JSON.parse(localStorage.getItem(STORAGE_KEY_GENERATED) || "{}");
+    return JSON.parse(localStorage.getItem(_cacheKey()) || "{}");
   } catch {
     return {};
   }
@@ -23,7 +29,7 @@ function _loadCache() {
 
 function _saveCache(cache) {
   try {
-    localStorage.setItem(STORAGE_KEY_GENERATED, JSON.stringify(cache));
+    localStorage.setItem(_cacheKey(), JSON.stringify(cache));
   } catch {}
 }
 
@@ -41,7 +47,7 @@ export function setCached(sectionId, content) {
 
 /** Clear all cached generated content. */
 export function clearGeneratedCache() {
-  localStorage.removeItem(STORAGE_KEY_GENERATED);
+  localStorage.removeItem(_cacheKey());
 }
 
 /**

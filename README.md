@@ -1,6 +1,6 @@
 # lilet_r3ad ⚡
 
-> **100% in-browser AI study assistant.** No backend, no external AI API, no analytics.
+> **In-browser AI study assistant.** AI inference runs locally; Supabase provides email accounts and private cloud-synced book libraries.
 > Built with vanilla JavaScript + Vite + WebLLM (`Qwen2.5-1.5B-Instruct-q4f16_1-MLC`).
 
 ---
@@ -11,7 +11,8 @@
 - **Multilingual Support:** Full Unicode normalization and right-to-left (`dir="auto"`) formatting for Arabic, French, and English courses.
 - **Document Processing:** Supports PDF, DOCX, and TXT files with structure-aware chapter and section extraction.
 - **Strict Grounding:** The AI only answers using facts from your uploaded course. If the answer is not in the material, it says so directly.
-- **Privacy First:** Documents and questions never leave your device.
+- **Per-account libraries:** Uploaded books are stored in Supabase and protected by row-level security so each account sees only its own books.
+- **Local AI:** Course content used for inference stays in the browser; Supabase is used for account authentication and book synchronization.
 
 ---
 
@@ -39,6 +40,17 @@ npm install
 npm run dev
 ```
 Open `http://localhost:5173` in Chrome or Edge.
+
+### 3. Configure Supabase
+
+Create a Supabase project, then run [`supabase/schema.sql`](supabase/schema.sql) in its SQL Editor to create the user-owned book table and row-level security policy. Copy `.env.example` to `.env` and set the project URL and anon key:
+
+```env
+VITE_SUPABASE_URL=https://your-project.supabase.co
+VITE_SUPABASE_ANON_KEY=your-supabase-anon-key
+```
+
+Set the same two environment variables in Vercel for every deployment environment, then redeploy. The anon key is intended for browser use; never use a service-role key in the client.
 
 ---
 

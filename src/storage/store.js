@@ -18,8 +18,14 @@
  */
 
 import { STORAGE_KEY_COURSE, STORAGE_KEY_PROGRESS, SCHEMA_VERSION } from "../app/config.js";
+import { getCurrentUser } from "../lib/authProvider.js";
 
 // ── helpers ───────────────────────────────────────────────────────────────────
+
+function _userKey(key) {
+  const userId = getCurrentUser()?.id;
+  return userId ? `${key}:${userId}` : key;
+}
 
 function _get(key) {
   try {
@@ -105,14 +111,14 @@ function _migrateV1(old) {
  * @returns {object|null}
  */
 export function loadCourse() {
-  const raw = _get(STORAGE_KEY_COURSE);
+  const raw = _get(_userKey(STORAGE_KEY_COURSE));
   if (!raw) return null;
 
   // Migrate v1
   if (!raw.schemaVersion || raw.schemaVersion < 2) {
     const migrated = _migrateV1(raw);
     if (migrated) {
-      _set(STORAGE_KEY_COURSE, migrated); // persist migrated form
+      _set(_userKey(STORAGE_KEY_COURSE), migrated); // persist migrated form
       return migrated;
     }
     return null;
@@ -159,21 +165,21 @@ export function saveCourse(course) {
     }
   }
 
-  return _set(STORAGE_KEY_COURSE, doc);
+  return _set(_userKey(STORAGE_KEY_COURSE), doc);
 }
 
 /** Clear the saved course. */
 export function clearCourse() {
-  localStorage.removeItem(STORAGE_KEY_COURSE);
+  localStorage.removeItem(_userKey(STORAGE_KEY_COURSE));
 }
 
 // ── Progress ──────────────────────────────────────────────────────────────────
 
-export function loadProgress() { return _get(STORAGE_KEY_PROGRESS); }
+export function loadProgress() { return _get(_userKey(STORAGE_KEY_PROGRESS)); }
 
-export function saveProgress(progress) { return _set(STORAGE_KEY_PROGRESS, progress); }
+export function saveProgress(progress) { return _set(_userKey(STORAGE_KEY_PROGRESS), progress); }
 
-export function clearProgress() { localStorage.removeItem(STORAGE_KEY_PROGRESS); }
+export function clearProgress() { localStorage.removeItem(_userKey(STORAGE_KEY_PROGRESS)); }
 
 // ── Legacy compat (old code uses saveDoc / loadDoc / clearDoc) ────────────────
 

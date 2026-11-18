@@ -2,11 +2,13 @@
 import { navigate }                     from "../app/router.js";
 import { el, append, empty }            from "../utils/dom.js";
 import { createModal, renderModePopup, renderOutlineModal } from "../components/modal.js";
-import { loadCourse, saveCourse }       from "../storage/store.js";
+import { saveCourse }                   from "../storage/store.js";
 import { setCourse }                    from "../app/state.js";
 import { processDocument }              from "../document/pipeline.js";
+import { listUserBooks, saveUserBook, deleteUserBooks } from "../lib/bookRepository.js";
+import { getCurrentUser, signOut } from "../lib/authProvider.js";
 
-// ── Starter sample courses (shown when localStorage has no saved courses yet) ──
+// ── Starter sample data retained for reference but not used in account libraries ──
 
 function _buildStarterCourse(id, name, sections) {
   return {
@@ -146,22 +148,6 @@ function _formatDate(ts) {
   return d.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
 }
 
-// ── Storage key for multi-document list ───────────────────────────────────────
-
-const DOCS_KEY = "lilet_r3ad_docs";
-
-function _loadDocs() {
-  try {
-    const raw = localStorage.getItem(DOCS_KEY);
-    if (raw) return JSON.parse(raw);
-  } catch { /* silent */ }
-  return null;
-}
-
-function _saveDocs(docs) {
-  try { localStorage.setItem(DOCS_KEY, JSON.stringify(docs)); } catch { /* ignore quota */ }
-}
-
 // ── Main export ────────────────────────────────────────────────────────────────
 
 export function renderDashboard(container) {
@@ -178,29 +164,7 @@ export function renderDashboard(container) {
   append(bgDiv, bgImg, bgOverlay);
 
   // ── State ────────────────────────────────────────────────────────────────
-  let storedDocs = _loadDocs();
-  let usingSamples = !storedDocs;
-
-  if (!storedDocs) {
-    const saved = loadCourse();
-    if (saved && Array.isArray(saved.sections) && saved.sections.length > 0) {
-      storedDocs = [{
-        id: saved.id || String(Date.now()),
-        name: saved.name || "Untitled",
-        progress: 0,
-        modifiedAt: saved.createdAt || Date.now(),
-        course: saved,
-      }];
-      _saveDocs(storedDocs);
-      usingSamples = false;
-    } else {
-      storedDocs = _getSampleDocs();
-      _saveDocs(storedDocs);
-      usingSamples = true;
-    }
-  }
-
-  let docs      = storedDocs ? [...storedDocs] : _getSampleDocs();
+  let docs      = [];
   let searchQ   = "";
   let sortDir   = -1;
   let selected  = new Set();
@@ -296,7 +260,17 @@ export function renderDashboard(container) {
   });
   feedbackBtn.addEventListener("click", () => _openFeedbackModal());
 
-  append(headerRight, aboutBtn, feedbackBtn);
+  const accountLabel = el("span", { cls: "dash-header-link", text: getCurrentUser()?.email || "Account" });
+  const signOutBtn = el("button", { cls: "dash-header-link", text: "Sign out", attrs: { type: "button" } });
+  signOutBtn.addEventListener("click", async () => {
+    try {
+      await signOut();
+      navigate("/");
+    } catch (error) {
+      _showToast(`Could not sign out: ${error.message}`);
+    }
+  });
+  append(headerRight, accountLabel, aboutBtn, feedbackBtn, signOutBtn);
   append(header, headerLeft, headerRight);
 
   // ── Main area ─────────────────────────────────────────────────────────────
@@ -350,11 +324,14 @@ export function renderDashboard(container) {
   append(deleteSelBtn, _svgTrash(), el("span", { text: "Delete selected" }));
   deleteSelBtn.addEventListener("click", () => {
     if (!selected.size) return;
-    docs = docs.filter(d => !selected.has(d.id));
-    if (!usingSamples) _saveDocs(docs);
-    selected.clear();
-    _updateBulkBar();
-    _renderList();
+    const ids = [...selected];
+    deleteUserBooks(ids).then(() => {
+      const deleted = new Set(ids);
+      docs = docs.filter((doc) => !deleted.has(doc.id));
+      ids.forEach((id) => selected.delete(id));
+      _updateBulkBar();
+      _renderList();
+    }).catch((error) => _showToast(`Could not delete books: ${error.message}`));
   });
   append(bulkBar, bulkLabel, deleteSelBtn);
 
@@ -536,11 +513,12 @@ export function renderDashboard(container) {
     deleteBtn.appendChild(el("span", { cls: "dash-tooltip", text: "Delete", dirAuto: false }));
     deleteBtn.addEventListener("click", (e) => {
       e.stopPropagation();
-      docs = docs.filter(d => d.id !== doc.id);
-      if (!usingSamples) _saveDocs(docs);
-      selected.delete(doc.id);
-      _updateBulkBar();
-      _renderList();
+      deleteUserBooks([doc.id]).then(() => {
+        docs = docs.filter(d => d.id !== doc.id);
+        selected.delete(doc.id);
+        _updateBulkBar();
+        _renderList();
+      }).catch((error) => _showToast(`Could not delete book: ${error.message}`));
     });
 
     append(actWrap, renameBtn, deleteBtn);
@@ -579,16 +557,10 @@ export function renderDashboard(container) {
 
   // ── Open document (mode popup) ─────────────────────────────────────────────
   function _openDocument(doc) {
-    let course = doc.course;
+    const course = doc.course;
     if (!course || (!course.sections?.length && !course.parts?.length)) {
-      const match = _getSampleDocs().find((d) => d.name === doc.name);
-      course = match?.course || _buildStarterCourse(doc.id, doc.name, [
-        {
-          id: 1,
-          title: "Introduction to " + doc.name,
-          text: doc.name + " covers essential concepts, core architectures, and key foundational principles.",
-        },
-      ]);
+      _showToast("This book has no course content and cannot be opened.");
+      return;
     }
     setCourse(course);
     saveCourse(course);
@@ -632,18 +604,28 @@ export function renderDashboard(container) {
     });
 
     cancelBtn.addEventListener("click", () => close());
-    saveBtn.addEventListener("click", () => {
+    saveBtn.addEventListener("click", async () => {
       const newName = nameInput.value.trim();
       if (!newName) return;
       const d = docs.find(d => d.id === renameId);
       if (d) {
-        d.name = newName;
-        if (d.course) d.course.name = newName;
-        d.modifiedAt = Date.now();
-        if (!usingSamples) _saveDocs(docs);
-        _renderList();
+        const updated = {
+          ...d,
+          name: newName,
+          modifiedAt: Date.now(),
+          course: { ...d.course, name: newName },
+        };
+        saveBtn.disabled = true;
+        try {
+          const saved = await saveUserBook(updated);
+          docs = docs.map((item) => item.id === saved.id ? saved : item);
+          _renderList();
+          close();
+        } catch (error) {
+          _showToast(`Could not rename book: ${error.message}`);
+          saveBtn.disabled = false;
+        }
       }
-      close();
     });
     nameInput.addEventListener("keydown", (e) => {
       if (e.key === "Enter") saveBtn.click();
@@ -771,29 +753,23 @@ export function renderDashboard(container) {
       renderOutlineModal(document.body, uploadedCourse, {
         onProceed: (finalCourse) => {
           const newDoc = {
-            id: String(Date.now()),
+            id: crypto.randomUUID(),
             name: uploadedFile?.name || finalCourse.name || "Untitled",
             progress: 0,
             modifiedAt: Date.now(),
             course: finalCourse,
           };
 
-          if (usingSamples) {
-            docs = [newDoc];
-            usingSamples = false;
-          } else {
-            docs.unshift(newDoc);
-          }
-          _saveDocs(docs);
-
-          _renderList();
-
-          setCourse(finalCourse);
-          saveCourse(finalCourse);
-          renderModePopup(document.body, {
-            onTeacher: () => navigate("/teacher"),
-            onPath:    () => navigate("/path"),
-          });
+          saveUserBook(newDoc).then((saved) => {
+            docs.unshift(saved);
+            _renderList();
+            setCourse(finalCourse);
+            saveCourse(finalCourse);
+            renderModePopup(document.body, {
+              onTeacher: () => navigate("/teacher"),
+              onPath:    () => navigate("/path"),
+            });
+          }).catch((error) => _showToast(`Could not save book: ${error.message}`));
         },
       });
     });
@@ -931,8 +907,18 @@ export function renderDashboard(container) {
     return wrap;
   }
 
-  // Initial render
-  _renderList();
+  tableWrap.appendChild(el("p", { cls: "dash-subheading", text: "Loading your books…" }));
+  listUserBooks().then((userBooks) => {
+    docs = userBooks;
+    _renderList();
+  }).catch((error) => {
+    empty(tableWrap);
+    tableWrap.appendChild(el("p", {
+      cls: "dash-subheading",
+      text: `Could not load your books: ${error.message}`,
+      attrs: { role: "alert" },
+    }));
+  });
 }
 
 // ── Theme toggle component ─────────────────────────────────────────────────────

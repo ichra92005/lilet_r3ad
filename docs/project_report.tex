@@ -27,14 +27,15 @@
 Lilet\_r3ad is a browser-based AI study assistant that runs entirely on the client
 side. Users upload course documents (PDF, DOCX, or plain text), and the application
 automatically builds a structured outline, generates flashcard sets, creates
-multiple-choice quizzes, and opens an AI tutor chat --- all without sending document
-content to external servers. The AI model is downloaded once and cached in the
-browser via IndexedDB; every inference call runs locally through WebGPU.
+multiple-choice quizzes, and opens an AI tutor chat. The AI model is downloaded
+once and cached in the browser via IndexedDB; every inference call runs locally
+through WebGPU. Signed-in users can sync their book library to their configured
+Supabase project.
 
-The application has no account or sign-in flow. Users enter the study workspace
-directly, and course data and progress are stored in browser \texttt{localStorage}.
-A Teacher mode allows instructors to create and share course packages, while a
-Study Partner mode pairs learners for collaborative review.
+Users sign in with email through Supabase Auth. Uploaded books are stored in a
+Supabase \texttt{user\_books} table protected by row-level security; each account
+can access only its own books. The active course, learning progress, and generated
+content cache remain in browser \texttt{localStorage}, scoped to the signed-in user.
 
 %% ─────────────────────────────────────────────────────────────
 \section{Technology Stack}
@@ -50,7 +51,7 @@ Build tool        & Vite 8.3.6 \\
 Runtime           & Browser (no Node.js at runtime) \\
 AI inference      & @mlc-ai/web-llm 0.2.88 (WebGPU, Web Worker) \\
 AI model          & \texttt{Qwen2.5-1.5B-Instruct-q4f16\_1-MLC} \\
-Persistence       & Browser \texttt{localStorage} \\
+Persistence       & Supabase (books and accounts); browser \texttt{localStorage} (active study state) \\
 Styling           & Custom CSS (design tokens, no CSS framework) \\
 Routing           & Hash-based router (custom, no library) \\
 Testing           & Node.js built-in test runner (\texttt{node --test}) \\
@@ -84,7 +85,9 @@ weights.
 
 \begin{enumerate}[leftmargin=*, label=\arabic*.]
   \item \textbf{Landing page} (\texttt{\#/}) --- The user sees the product hero,
-        feature highlights, and can continue to the study workspace.
+        feature highlights, and can sign in or create an account.
+  \item \textbf{Account access} (\texttt{\#/login}) --- Email/password sign-in
+        and account creation through Supabase Auth.
   \item \textbf{Dashboard} (\texttt{\#/dashboard}) --- The user sees their
         document library. Clicking \emph{New document} opens a compact upload
         modal accepting PDF, DOCX, or TXT files.
@@ -103,25 +106,25 @@ weights.
 \end{enumerate}
 
 %% ─────────────────────────────────────────────────────────────
-Document data, generated flashcards, quiz results, and learning progress are
-stored in browser \texttt{localStorage}, keyed by the constants defined in
-\texttt{src/app/config.js}. No account or remote database is required.
+Book documents are synchronized through Supabase and protected by the row-level
+security policy in \texttt{supabase/schema.sql}. Active course data, generated
+flashcards, quiz results, and learning progress are stored in user-scoped browser
+\texttt{localStorage}; configure \texttt{VITE\_SUPABASE\_URL} and
+\texttt{VITE\_SUPABASE\_ANON\_KEY} for local and Vercel deployments.
 
 %% ─────────────────────────────────────────────────────────────
 \section{Limitations}
 
 \begin{itemize}[leftmargin=*]
-  \item \textbf{Browser-only storage}: document content, flashcards, and quiz
-        progress are stored in \texttt{localStorage}/\texttt{sessionStorage}.
-        Clearing browser data permanently deletes all study progress.
+  \item \textbf{Local study state}: active course, generated content, and quiz
+        progress remain in browser storage and do not yet synchronize between
+        devices. The book library itself is cloud-synchronized.
   \item \textbf{Model load time}: the Qwen2.5 model (~1~GB) must be downloaded
         on first launch. On slow connections or low-end devices this takes several
         minutes.
   \item \textbf{WebGPU requirement}: the AI engine uses WebGPU, which is only
         available in desktop Chrome and Edge. Mobile browsers and Firefox are not
         supported for AI features.
-  \item \textbf{Browser-local data}: there is no account-based synchronization
-        between browsers or devices.
   \item \textbf{Single-document study}: the application processes one document at
         a time; there is no multi-document or cross-document study mode.
   \item \textbf{Hosting}: no deployment configuration (Vercel, Netlify, Docker,

@@ -90,6 +90,50 @@ h1,h2,h3,h4 { line-height: 1.25; font-weight: 700; font-family: var(--font-displ
   white-space: nowrap;
 }
 
+.account-screen {
+  display: grid;
+  place-items: center;
+  padding: 32px 16px;
+}
+
+.account-card {
+  width: min(100%, 440px);
+  padding: 32px;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  background: var(--surface, #fff);
+  box-shadow: 0 20px 60px rgba(15, 23, 42, 0.12);
+}
+
+.account-home { display: inline-block; margin-bottom: 24px; }
+.account-card h1 { margin-bottom: 8px; }
+.account-card > p { margin-bottom: 24px; color: var(--muted); }
+.account-form { display: grid; gap: 14px; }
+.account-form label { display: grid; gap: 6px; font-weight: 600; }
+.account-form input {
+  width: 100%;
+  padding: 11px 12px;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  background: var(--bg);
+  color: var(--text);
+  font: inherit;
+}
+.account-submit {
+  padding: 12px;
+  border: 0;
+  border-radius: 9px;
+  background: var(--accent);
+  color: #fff;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+.account-submit:disabled { opacity: 0.6; cursor: not-allowed; }
+.account-toggle { border: 0; background: none; color: var(--accent); font: inherit; cursor: pointer; }
+.account-message { min-height: 1.5em; color: var(--muted); overflow-wrap: anywhere; }
+.account-message--error { color: var(--red); }
+
 /* Error banner (quota / global) */
 .error-banner {
   position: fixed;
