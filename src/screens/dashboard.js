@@ -1,33 +1,139 @@
 /**
  * src/screens/dashboard.js
- * Dashboard screen (#/dashboard) — the main page after the user clicks "Start".
- * Layout: fixed left sidebar + top header + scrollable document list.
- * All text goes through textContent / el() — no innerHTML.
+ * Dashboard screen (#/dashboard) — unified with the Lilet_r3ad landing page theme.
+ * Layout: shared pastel backdrop + glassmorphic sidebar + top header + document workspace panel.
+ * All text goes through textContent / el() — no innerHTML on user data.
  */
 
 import { navigate }                     from "../app/router.js";
 import { el, append, empty }            from "../utils/dom.js";
-import { createModal, renderModePopup } from "../components/modal.js";
-import {
-  loadCourse, saveCourse, clearCourse,
-  loadProgress, clearProgress,
-} from "../storage/store.js";
+import { createModal, renderModePopup, renderOutlineModal } from "../components/modal.js";
+import { loadCourse, saveCourse }       from "../storage/store.js";
 import { setCourse }                    from "../app/state.js";
 import { processDocument }              from "../document/pipeline.js";
 
-// ── Sample documents (shown when localStorage is empty) ───────────────────────
+// ── Starter sample courses (shown when localStorage has no saved courses yet) ──
+
+function _buildStarterCourse(id, name, sections) {
+  return {
+    id,
+    name,
+    createdAt: Date.now(),
+    chapters: [{ id: 1, title: name, sections }],
+    sections,
+  };
+}
 
 function _getSampleDocs() {
   return [
-    { id: "sample-1", name: "Databases course",          progress: 72, modifiedAt: Date.now() - 1 * 86400e3 },
-    { id: "sample-2", name: "Cybersecurity",             progress: 45, modifiedAt: Date.now() - 2 * 86400e3 },
-    { id: "sample-3", name: "Assignment Law",            progress: 10, modifiedAt: Date.now() - 3 * 86400e3 },
-    { id: "sample-4", name: "Linear Algebra – Chap. 3", progress: 90, modifiedAt: Date.now() - 4 * 86400e3 },
-    { id: "sample-5", name: "Introduction to React",     progress: 60, modifiedAt: Date.now() - 5 * 86400e3 },
-    { id: "sample-6", name: "Algorithms & Complexity",   progress: 30, modifiedAt: Date.now() - 6 * 86400e3 },
-    { id: "sample-7", name: "Philosophy of Science",     progress: 5,  modifiedAt: Date.now() - 7 * 86400e3 },
-    { id: "sample-8", name: "Network Protocols",         progress: 55, modifiedAt: Date.now() - 8 * 86400e3 },
-    { id: "sample-9", name: "Machine Learning Basics",   progress: 80, modifiedAt: Date.now() - 9 * 86400e3 },
+    {
+      id: "sample-1",
+      name: "Databases course",
+      progress: 72,
+      modifiedAt: Date.now() - 1 * 86400e3,
+      course: _buildStarterCourse("sample-1", "Databases course", [
+        {
+          id: 1,
+          title: "Relational Model & Keys",
+          text: "A relational database stores data in tables made of rows (tuples) and columns (attributes). A primary key uniquely identifies each row in a table and cannot be null. A foreign key links one table to the primary key of another table, preserving referential integrity across related records.",
+        },
+        {
+          id: 2,
+          title: "Normalization & ACID Transactions",
+          text: "Normalization organizes tables to reduce data redundancy and prevent update anomalies. First Normal Form requires atomic values, Second Normal Form removes partial dependencies, and Third Normal Form removes transitive dependencies. Transactions follow ACID properties: Atomicity, Consistency, Isolation, and Durability.",
+        },
+      ]),
+    },
+    {
+      id: "sample-2",
+      name: "Cybersecurity",
+      progress: 45,
+      modifiedAt: Date.now() - 2 * 86400e3,
+      course: _buildStarterCourse("sample-2", "Cybersecurity", [
+        {
+          id: 1,
+          title: "The CIA Triad",
+          text: "Information security rests on three core principles called the CIA triad: Confidentiality, Integrity, and Availability. Confidentiality keeps sensitive data private through encryption and access control. Integrity ensures data cannot be altered without authorization. Availability guarantees systems stay accessible when needed.",
+        },
+        {
+          id: 2,
+          title: "Authentication & Encryption",
+          text: "Strong authentication verifies identity using something you know, something you have, or something you are. Multi-factor authentication combines two or more factors to stop credential theft. Symmetric encryption uses a single shared key for speed, while asymmetric encryption uses a public and private key pair.",
+        },
+      ]),
+    },
+    {
+      id: "sample-3",
+      name: "Introduction to React",
+      progress: 60,
+      modifiedAt: Date.now() - 3 * 86400e3,
+      course: _buildStarterCourse("sample-3", "Introduction to React", [
+        {
+          id: 1,
+          title: "Components & Props",
+          text: "React applications are built from reusable components that return user interface elements. Props are read-only inputs passed from a parent component to a child component, allowing the same component structure to render different data cleanly.",
+        },
+        {
+          id: 2,
+          title: "State & Effects",
+          text: "State stores dynamic data that changes over time inside a component. When state updates, React re-renders only the affected parts of the interface. Effects synchronize a component with external systems such as timers, browser storage, or network requests.",
+        },
+      ]),
+    },
+    {
+      id: "sample-4",
+      name: "Linear Algebra – Chap. 3",
+      progress: 90,
+      modifiedAt: Date.now() - 4 * 86400e3,
+      course: _buildStarterCourse("sample-4", "Linear Algebra – Chap. 3", [
+        {
+          id: 1,
+          title: "Vectors & Linear Independence",
+          text: "A vector space is a collection of vectors that can be scaled and added together. Vectors are linearly independent if no vector in the set can be written as a linear combination of the others. A basis is a linearly independent set that spans the entire space.",
+        },
+        {
+          id: 2,
+          title: "Eigenvalues & Eigenvectors",
+          text: "For a square matrix A, a non-zero vector v is an eigenvector if multiplying A by v only scales v by a scalar factor called the eigenvalue. Eigenvalues reveal the stretching directions and stability behavior of linear transformations.",
+        },
+      ]),
+    },
+    {
+      id: "sample-5",
+      name: "Algorithms & Complexity",
+      progress: 30,
+      modifiedAt: Date.now() - 5 * 86400e3,
+      course: _buildStarterCourse("sample-5", "Algorithms & Complexity", [
+        {
+          id: 1,
+          title: "Big-O Asymptotic Notation",
+          text: "Big-O notation describes how an algorithm's runtime or memory grows as the input size n increases. Constant time O(1) stays fixed, logarithmic time O(log n) halves the search space each step, and linear time O(n) grows proportionally with input length.",
+        },
+        {
+          id: 2,
+          title: "Divide and Conquer",
+          text: "Divide and conquer algorithms break a problem into smaller subproblems, solve each recursively, and combine the results. Merge sort splits an array in half and merges sorted halves in O(n log n) time, making it reliable even on large unsorted datasets.",
+        },
+      ]),
+    },
+    {
+      id: "sample-6",
+      name: "Network Protocols",
+      progress: 55,
+      modifiedAt: Date.now() - 6 * 86400e3,
+      course: _buildStarterCourse("sample-6", "Network Protocols", [
+        {
+          id: 1,
+          title: "TCP vs UDP Transport",
+          text: "TCP is a connection-oriented protocol that guarantees ordered, reliable delivery through acknowledgments and retransmissions. UDP is connectionless and lightweight, trading reliability for lower latency in live video, voice calls, and online gaming.",
+        },
+        {
+          id: 2,
+          title: "HTTP & DNS Resolution",
+          text: "DNS translates human-readable domain names into IP addresses so browsers can locate servers. Over that connection, HTTP defines request and response methods such as GET, POST, and status codes so clients and servers can exchange web resources.",
+        },
+      ]),
+    },
   ];
 }
 
@@ -55,7 +161,7 @@ function _loadDocs() {
     const raw = localStorage.getItem(DOCS_KEY);
     if (raw) return JSON.parse(raw);
   } catch { /* silent */ }
-  return null;          // null = "no real docs yet"
+  return null;
 }
 
 function _saveDocs(docs) {
@@ -67,15 +173,23 @@ function _saveDocs(docs) {
 export function renderDashboard(container) {
   container.className = "screen dash-root";
 
+  // ── Shared blurred pastel background (matches landing page) ──────────────
+  const bgDiv = el("div", { cls: "landing-bg", attrs: { "aria-hidden": "true" } });
+  const bgImg = el("img", {
+    cls: "landing-bg-img",
+    attrs: { src: "/assets/___3__26dcc747.jpeg", alt: "" },
+  });
+  bgImg.onerror = () => { bgImg.style.display = "none"; };
+  const bgOverlay = el("div", { cls: "landing-bg-overlay" });
+  append(bgDiv, bgImg, bgOverlay);
+
   // ── State ────────────────────────────────────────────────────────────────
   let storedDocs = _loadDocs();
-  const usingSamples = !storedDocs;
+  let usingSamples = !storedDocs;
 
-  // If the user has a saved single-course in the old store AND no dash docs yet,
-  // adopt it as the first document.
   if (!storedDocs) {
     const saved = loadCourse();
-    if (saved) {
+    if (saved && Array.isArray(saved.sections) && saved.sections.length > 0) {
       storedDocs = [{
         id: saved.id || String(Date.now()),
         name: saved.name || "Untitled",
@@ -84,43 +198,64 @@ export function renderDashboard(container) {
         course: saved,
       }];
       _saveDocs(storedDocs);
+      usingSamples = false;
+    } else {
+      storedDocs = _getSampleDocs();
+      _saveDocs(storedDocs);
+      usingSamples = true;
     }
   }
 
   let docs      = storedDocs ? [...storedDocs] : _getSampleDocs();
   let searchQ   = "";
-  let sortDir   = -1; // -1 = newest first, 1 = oldest first
+  let sortDir   = -1;
   let selected  = new Set();
   let renameId  = null;
 
   // ── Sidebar ──────────────────────────────────────────────────────────────
   const sidebar = el("aside", { cls: "dash-sidebar", attrs: { "aria-label": "Sidebar" } });
 
-  // Logo
-  const logoWrap = el("div", { cls: "dash-sidebar-logo" });
-  const mascot   = el("span", { cls: "dash-mascot", text: "🤖", dirAuto: false });
-  const logoText = el("span", { cls: "dash-logo-text", text: "lilet_r3ad" });
-  append(logoWrap, mascot, logoText);
+  const logoWrap = el("a", {
+    cls: "dash-sidebar-logo",
+    attrs: { href: "#/", "aria-label": "Lilet_r3ad Home" },
+  });
+  const mascotImg = el("img", {
+    cls: "dash-mascot-img",
+    attrs: {
+      src: "/assets/Screenshot_2026-11-18_at_1.12.35_AM_4f655e17.png",
+      alt: "",
+    },
+  });
+  const logoText = el("span", { cls: "dash-logo-text", text: "Lilet_r3ad", dirAuto: false });
+  append(logoWrap, mascotImg, logoText);
 
   // Nav
-  const nav     = el("nav",  { cls: "dash-nav", attrs: { "aria-label": "Main navigation" } });
-  const navItem = el("button", {
+  const nav = el("nav", { cls: "dash-nav", attrs: { "aria-label": "Main navigation" } });
+
+  const navDocs = el("button", {
     cls: "dash-nav-item dash-nav-item--active",
     attrs: { type: "button", "aria-current": "page", "aria-label": "All documents" },
   });
-  const bookIcon = _svgBook();
-  const navLabel = el("span", { text: "All documents" });
-  append(navItem, bookIcon, navLabel);
-  nav.appendChild(navItem);
+  append(navDocs, _svgBook(), el("span", { text: "All documents" }));
+
+  const navHome = el("button", {
+    cls: "dash-nav-item dash-home-btn",
+    attrs: { type: "button", "aria-label": "Back to landing page" },
+  });
+  append(navHome, _svgHome(), el("span", { text: "Home" }));
+  navHome.addEventListener("click", () => navigate("/"));
+
+  append(nav, navDocs);
 
   // Theme toggle (bottom of sidebar)
   const themeToggleWrap = el("div", { cls: "dash-theme-wrap" });
-  const themeToggle     = _buildThemeToggle();
-  themeToggleWrap.appendChild(themeToggle);
+  const themeLabel = el("span", { cls: "dash-theme-label", text: "Theme" });
+  const themeToggle = _buildThemeToggle();
+  append(themeToggleWrap, themeLabel, themeToggle);
 
-  append(sidebar, logoWrap, nav, themeToggleWrap);
+  append(sidebar, logoWrap, nav, themeToggleWrap, navHome);
 
-  // Mobile menu button (shown in header on small screens)
+  // Mobile menu button
   const menuBtn = el("button", {
     cls: "dash-menu-btn btn btn-ghost btn-sm",
     attrs: { type: "button", "aria-label": "Open sidebar", "aria-expanded": "false" },
@@ -148,14 +283,15 @@ export function renderDashboard(container) {
   const header = el("header", { cls: "dash-header", attrs: { role: "banner" } });
 
   const headerLeft = el("div", { cls: "dash-header-left" });
-  headerLeft.appendChild(menuBtn);
+  const breadcrumb = el("span", { cls: "dash-breadcrumb", text: "Study Workspace" });
+  append(headerLeft, menuBtn, breadcrumb);
 
   const headerRight = el("div", { cls: "dash-header-right" });
 
-  const aboutBtn    = el("button", {
+  const aboutBtn = el("button", {
     cls: "dash-header-link",
     text: "About us",
-    attrs: { type: "button", "aria-label": "About lilet_r3ad" },
+    attrs: { type: "button", "aria-label": "About Lilet_r3ad" },
   });
   aboutBtn.addEventListener("click", () => _openAboutModal());
 
@@ -170,31 +306,35 @@ export function renderDashboard(container) {
   append(header, headerLeft, headerRight);
 
   // ── Main area ─────────────────────────────────────────────────────────────
-  const main   = el("main",  { cls: "dash-main",  attrs: { id: "main-content", "aria-label": "Document list" } });
-  const panel  = el("section", { cls: "dash-panel" });
+  const main  = el("main",    { cls: "dash-main", attrs: { id: "main-content", "aria-label": "Document list" } });
+  const panel = el("section", { cls: "dash-panel" });
 
   // Title row
-  const titleRow = el("div",  { cls: "dash-title-row" });
-  const heading  = el("h1",   { cls: "dash-heading", text: "All documents" });
+  const titleRow = el("div", { cls: "dash-title-row" });
+  const titleGroup = el("div", { cls: "dash-title-group" });
+  const heading = el("h1", { cls: "dash-heading", text: "All documents" });
+  const subheading = el("p", {
+    cls: "dash-subheading",
+    text: "Select a course to study with Teacher Chat or Study Partner, or upload a new file.",
+  });
+  append(titleGroup, heading, subheading);
+
   const newDocBtn = el("button", {
     cls: "dash-new-btn",
     attrs: { type: "button", "aria-label": "New document" },
   });
-  const plusIcon = _svgPlus();
-  const newLabel = el("span", { text: "New document" });
-  append(newDocBtn, plusIcon, newLabel);
+  append(newDocBtn, _svgPlus(), el("span", { text: "New document" }));
   newDocBtn.addEventListener("click", () => _openNewDocModal());
 
-  append(titleRow, heading, newDocBtn);
+  append(titleRow, titleGroup, newDocBtn);
 
   // Search bar
-  const searchWrap  = el("div",   { cls: "dash-search-wrap" });
-  const searchIcon  = _svgSearch();
+  const searchWrap = el("div", { cls: "dash-search-wrap" });
   const searchInput = el("input", {
     cls: "dash-search",
     attrs: {
       type: "search",
-      placeholder: "Search in all documents...",
+      placeholder: "Search your documents...",
       "aria-label": "Search documents",
       autocomplete: "off",
     },
@@ -203,12 +343,12 @@ export function renderDashboard(container) {
     searchQ = searchInput.value.trim().toLowerCase();
     _renderList();
   });
-  append(searchWrap, searchIcon, searchInput);
+  append(searchWrap, _svgSearch(), searchInput);
 
-  // Bulk toolbar (shown when rows are selected)
+  // Bulk toolbar
   const bulkBar = el("div", { cls: "dash-bulk-bar", attrs: { role: "toolbar", "aria-label": "Bulk actions" } });
   bulkBar.style.display = "none";
-  const bulkLabel  = el("span", { cls: "dash-bulk-label" });
+  const bulkLabel = el("span", { cls: "dash-bulk-label" });
   const deleteSelBtn = el("button", {
     cls: "dash-bulk-delete",
     attrs: { type: "button", "aria-label": "Delete selected documents" },
@@ -216,12 +356,8 @@ export function renderDashboard(container) {
   append(deleteSelBtn, _svgTrash(), el("span", { text: "Delete selected" }));
   deleteSelBtn.addEventListener("click", () => {
     if (!selected.size) return;
-    if (!usingSamples) {
-      docs = docs.filter(d => !selected.has(d.id));
-      _saveDocs(docs);
-    } else {
-      docs = docs.filter(d => !selected.has(d.id));
-    }
+    docs = docs.filter(d => !selected.has(d.id));
+    if (!usingSamples) _saveDocs(docs);
     selected.clear();
     _updateBulkBar();
     _renderList();
@@ -235,21 +371,16 @@ export function renderDashboard(container) {
   main.appendChild(panel);
 
   // ── Root assembly ─────────────────────────────────────────────────────────
-  append(container, overlay, sidebar, header, main);
-  // Replace placeholder with real header + main
-  const col = container.querySelector(".dash-content-col");
+  const col = el("div", { cls: "dash-content-col" });
   append(col, header, main);
+  append(container, bgDiv, overlay, sidebar, col);
 
   // ── List renderer ─────────────────────────────────────────────────────────
   function _renderList() {
     empty(tableWrap);
 
     const q = searchQ;
-    const filtered = docs.filter(d =>
-      !q || d.name.toLowerCase().includes(q)
-    );
-
-    // Sort by modifiedAt
+    const filtered = docs.filter(d => !q || d.name.toLowerCase().includes(q));
     filtered.sort((a, b) => sortDir * (b.modifiedAt - a.modifiedAt));
 
     if (filtered.length === 0 && docs.length === 0) {
@@ -265,52 +396,43 @@ export function renderDashboard(container) {
 
     const table = el("table", { cls: "dash-table", attrs: { role: "table" } });
     const thead = el("thead");
-    const thr   = el("tr",   { cls: "dash-thead-row" });
+    const thr   = el("tr", { cls: "dash-thead-row" });
 
     // Select-all checkbox
-    const thCheck   = el("th", { cls: "dash-th dash-th--check", attrs: { scope: "col" } });
+    const thCheck = el("th", { cls: "dash-th dash-th--check", attrs: { scope: "col" } });
     const selectAll = el("input", {
       attrs: { type: "checkbox", "aria-label": "Select all documents" },
     });
     selectAll.addEventListener("change", () => {
-      if (selectAll.checked) {
-        filtered.forEach(d => selected.add(d.id));
-      } else {
-        filtered.forEach(d => selected.delete(d.id));
-      }
+      if (selectAll.checked) filtered.forEach(d => selected.add(d.id));
+      else filtered.forEach(d => selected.delete(d.id));
       _updateBulkBar();
       _renderList();
     });
     thCheck.appendChild(selectAll);
 
-    // Title header
     const thTitle = el("th", { cls: "dash-th dash-th--title", attrs: { scope: "col" } });
     thTitle.textContent = "Title";
 
-    // Progress header
     const thProg = el("th", { cls: "dash-th dash-th--progress", attrs: { scope: "col" } });
     thProg.textContent = "Progress";
 
-    // Last modified (sortable)
     const thDate = el("th", { cls: "dash-th dash-th--date", attrs: { scope: "col" } });
     const thDateBtn = el("button", {
       cls: "dash-sort-btn",
       attrs: { type: "button", "aria-label": "Sort by last modified" },
     });
-    const thDateLabel = el("span", { text: "Last modified" });
-    const sortArrow   = el("span", { cls: "dash-sort-arrow", dirAuto: false });
+    const sortArrow = el("span", { cls: "dash-sort-arrow", dirAuto: false });
     sortArrow.textContent = sortDir === -1 ? "↓" : "↑";
-    append(thDateBtn, thDateLabel, sortArrow);
+    append(thDateBtn, el("span", { text: "Last modified" }), sortArrow);
     thDate.appendChild(thDateBtn);
     thDateBtn.addEventListener("click", () => {
       sortDir *= -1;
       _renderList();
     });
 
-    // Actions header (visually empty)
     const thAct = el("th", { cls: "dash-th dash-th--actions", attrs: { scope: "col" } });
-    const actLabel = el("span", { cls: "sr-only", text: "Actions" });
-    thAct.appendChild(actLabel);
+    thAct.appendChild(el("span", { cls: "sr-only", text: "Actions" }));
 
     append(thr, thCheck, thTitle, thProg, thDate, thAct);
     thead.appendChild(thr);
@@ -321,7 +443,6 @@ export function renderDashboard(container) {
     table.appendChild(tbody);
     tableWrap.appendChild(table);
 
-    // Sync select-all checkbox state
     const checkedCount = filtered.filter(d => selected.has(d.id)).length;
     selectAll.checked       = checkedCount === filtered.length && filtered.length > 0;
     selectAll.indeterminate = checkedCount > 0 && checkedCount < filtered.length;
@@ -341,7 +462,7 @@ export function renderDashboard(container) {
     cb.addEventListener("change", (e) => {
       e.stopPropagation();
       if (cb.checked) selected.add(doc.id);
-      else             selected.delete(doc.id);
+      else selected.delete(doc.id);
       _updateBulkBar();
       _renderList();
     });
@@ -349,8 +470,15 @@ export function renderDashboard(container) {
 
     // Title cell
     const tdTitle = el("td", { cls: "dash-td dash-td--title" });
-    const docIcon  = el("span", { cls: "dash-doc-icon", text: "📄", dirAuto: false });
-    const docName  = el("span", { cls: "dash-doc-name", text: doc.name });
+    const docIcon = el("img", {
+      cls: "dash-doc-icon",
+      attrs: {
+        src: "/assets/aistudio/p2logo3_ba527f4c.png",
+        alt: "",
+        referrerpolicy: "no-referrer",
+      },
+    });
+    const docName = el("span", { cls: "dash-doc-name", text: doc.name });
     append(tdTitle, docIcon, docName);
 
     // Progress cell
@@ -390,8 +518,7 @@ export function renderDashboard(container) {
       attrs: { type: "button", "aria-label": `Rename ${doc.name}` },
     });
     renameBtn.appendChild(_svgPencil());
-    const renameTip = el("span", { cls: "dash-tooltip", text: "Rename", dirAuto: false });
-    renameBtn.appendChild(renameTip);
+    renameBtn.appendChild(el("span", { cls: "dash-tooltip", text: "Rename", dirAuto: false }));
     renameBtn.addEventListener("click", (e) => {
       e.stopPropagation();
       _openRenameModal(doc);
@@ -402,8 +529,7 @@ export function renderDashboard(container) {
       attrs: { type: "button", "aria-label": `Delete ${doc.name}` },
     });
     deleteBtn.appendChild(_svgTrash());
-    const deleteTip = el("span", { cls: "dash-tooltip", text: "Delete", dirAuto: false });
-    deleteBtn.appendChild(deleteTip);
+    deleteBtn.appendChild(el("span", { cls: "dash-tooltip", text: "Delete", dirAuto: false }));
     deleteBtn.addEventListener("click", (e) => {
       e.stopPropagation();
       docs = docs.filter(d => d.id !== doc.id);
@@ -416,7 +542,7 @@ export function renderDashboard(container) {
     append(actWrap, renameBtn, deleteBtn);
     tdAct.appendChild(actWrap);
 
-    // Row click → open document (mode popup)
+    // Row click -> open document mode popup
     tr.addEventListener("click", (e) => {
       if (e.target === cb || e.target === renameBtn || e.target === deleteBtn ||
           renameBtn.contains(e.target) || deleteBtn.contains(e.target)) return;
@@ -449,12 +575,19 @@ export function renderDashboard(container) {
 
   // ── Open document (mode popup) ─────────────────────────────────────────────
   function _openDocument(doc) {
-    if (doc.course) {
-      setCourse(doc.course);
-    } else {
-      // For sample docs, navigate to mode popup directly
-      setCourse({ name: doc.name, sections: [], chapters: [] });
+    let course = doc.course;
+    if (!course || (!course.sections?.length && !course.parts?.length)) {
+      const match = _getSampleDocs().find((d) => d.name === doc.name);
+      course = match?.course || _buildStarterCourse(doc.id, doc.name, [
+        {
+          id: 1,
+          title: "Introduction to " + doc.name,
+          text: doc.name + " covers essential concepts, core architectures, and key foundational principles.",
+        },
+      ]);
     }
+    setCourse(course);
+    saveCourse(course);
     renderModePopup(document.body, {
       onTeacher: () => navigate("/teacher"),
       onPath:    () => navigate("/path"),
@@ -475,7 +608,6 @@ export function renderDashboard(container) {
         autocomplete: "off",
       },
     });
-    // Set value via property (not attr) for proper display
     setTimeout(() => { nameInput.value = doc.name; nameInput.select(); }, 50);
 
     const saveBtn = el("button", {
@@ -502,6 +634,7 @@ export function renderDashboard(container) {
       const d = docs.find(d => d.id === renameId);
       if (d) {
         d.name = newName;
+        if (d.course) d.course.name = newName;
         d.modifiedAt = Date.now();
         if (!usingSamples) _saveDocs(docs);
         _renderList();
@@ -519,8 +652,6 @@ export function renderDashboard(container) {
     let uploadedCourse = null;
     let uploadedFile   = null;
 
-    // Use a label wrapping the hidden file input — clicking the label
-    // reliably opens the system file picker even inside a modal.
     const fileInputId = "dash-file-upload-" + Date.now();
     const fileInput = el("input", {
       cls: "sr-only",
@@ -536,12 +667,12 @@ export function renderDashboard(container) {
       cls: "dash-drop-zone",
       attrs: { for: fileInputId, tabindex: "0", "aria-label": "Upload a file — PDF, DOCX, or TXT" },
     });
-    const zoneIcon = el("span", { cls: "dash-drop-icon", text: "📂", dirAuto: false });
+    const zoneIcon = el("span", { cls: "dash-drop-icon", attrs: { "aria-hidden": "true" } });
+    zoneIcon.appendChild(_svgUpload());
     const zoneText = el("p", { cls: "dash-drop-text", text: "Click to browse or drag & drop" });
     const zoneHint = el("p", { cls: "dash-drop-hint", text: "Supported: PDF, DOCX, TXT" });
     append(zone, zoneIcon, zoneText, zoneHint);
 
-    // Keyboard: Enter/Space on the label triggers click → file picker
     zone.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); zone.click(); } });
     zone.addEventListener("dragover", (e) => { e.preventDefault(); zone.classList.add("dash-drop-zone--over"); });
     zone.addEventListener("dragleave", () => zone.classList.remove("dash-drop-zone--over"));
@@ -583,7 +714,6 @@ export function renderDashboard(container) {
 
       uploadedFile = file;
 
-      // Show chip with progress
       empty(chipArea);
       const chip     = el("div", { cls: "dash-file-chip" });
       const chipName = el("span", { cls: "dash-chip-name", text: file.name });
@@ -611,13 +741,13 @@ export function renderDashboard(container) {
         });
         clearInterval(fakeProgress);
         chipFill.style.width = "100%";
-        statusEl.textContent = "✅ Ready!";
+        statusEl.textContent = "Ready!";
         statusEl.className   = "dash-upload-status dash-upload-status--ok";
         uploadedCourse = course;
         createBtn.removeAttribute("disabled");
       } catch (err) {
         clearInterval(fakeProgress);
-        statusEl.textContent = `❌ ${err.message}`;
+        statusEl.textContent = `Error: ${err.message}`;
         statusEl.className   = "dash-upload-status dash-upload-status--error";
       }
     }
@@ -632,28 +762,35 @@ export function renderDashboard(container) {
     cancelBtn.addEventListener("click", () => close());
     createBtn.addEventListener("click", () => {
       if (!uploadedCourse) return;
-
-      const newDoc = {
-        id: String(Date.now()),
-        name: uploadedFile?.name || uploadedCourse.name || "Untitled",
-        progress: 0,
-        modifiedAt: Date.now(),
-        course: uploadedCourse,
-      };
-
-      docs.unshift(newDoc);
-      if (!usingSamples) _saveDocs(docs);
-      else _saveDocs(docs); // promote to real storage
-
-      _renderList();
       close();
 
-      // Open mode popup for the new doc
-      setCourse(uploadedCourse);
-      saveCourse(uploadedCourse);
-      renderModePopup(document.body, {
-        onTeacher: () => navigate("/teacher"),
-        onPath:    () => navigate("/path"),
+      renderOutlineModal(document.body, uploadedCourse, {
+        onProceed: (finalCourse) => {
+          const newDoc = {
+            id: String(Date.now()),
+            name: uploadedFile?.name || finalCourse.name || "Untitled",
+            progress: 0,
+            modifiedAt: Date.now(),
+            course: finalCourse,
+          };
+
+          if (usingSamples) {
+            docs = [newDoc];
+            usingSamples = false;
+          } else {
+            docs.unshift(newDoc);
+          }
+          _saveDocs(docs);
+
+          _renderList();
+
+          setCourse(finalCourse);
+          saveCourse(finalCourse);
+          renderModePopup(document.body, {
+            onTeacher: () => navigate("/teacher"),
+            onPath:    () => navigate("/path"),
+          });
+        },
       });
     });
   }
@@ -662,20 +799,22 @@ export function renderDashboard(container) {
   function _openAboutModal() {
     const wrap = el("div", { cls: "dash-about-body" });
 
-    const mascotEl = el("div", { cls: "dash-about-mascot", text: "🤖", dirAuto: false });
+    const mascotEl = el("img", {
+      cls: "dash-about-mascot-img",
+      attrs: { src: "/assets/Screenshot_2026-11-18_at_1.12.35_AM_4f655e17.png", alt: "Lilet_r3ad mascot" },
+    });
 
-    const title = el("h2", { cls: "dash-about-title", text: "lilet_r3ad" });
+    const title = el("h2", { cls: "dash-about-title", text: "Lilet_r3ad" });
     const desc  = el("p",  {
-      text: "lilet_r3ad is a privacy-first AI study helper that runs entirely in your browser — no server, no account, no data ever leaving your device.",
+      text: "Lilet_r3ad is a calm, privacy-first AI study helper that runs right in your browser — no external tracking and your study files stay on your device.",
     });
     const desc2 = el("p",  {
-      text: "Upload a course PDF or document and your personal AI tutor will help you understand it, quiz you, and build a step-by-step study plan.",
+      text: "Upload a course PDF, DOCX, or TXT and your personal study partner will help explain key ideas, generate flashcards, and quiz you step by step.",
     });
     const mascotDesc = el("p", { cls: "dash-about-mascot-desc" });
-    const bold = el("strong", { text: "Meet Lilet " });
-    mascotDesc.appendChild(bold);
+    mascotDesc.appendChild(el("strong", { text: "Meet Lilet " }));
     mascotDesc.appendChild(document.createTextNode(
-      "— the robot mascot. Lilet (short for little-reader) loves highlighting key facts, making flashcards, and cheering you on through every section. 🎉"
+      "— your smiling star study companion, here to keep every study session clear, organized, and stress-free."
     ));
 
     append(wrap, mascotEl, title, desc, desc2, mascotDesc);
@@ -686,7 +825,7 @@ export function renderDashboard(container) {
       attrs: { type: "button" },
     });
     const { close } = createModal(document.body, {
-      title: "About lilet_r3ad",
+      title: "About Lilet_r3ad",
       body: wrap,
       footerButtons: [closeBtn],
     });
@@ -728,7 +867,7 @@ export function renderDashboard(container) {
       },
     });
 
-    const ratingLabel = el("label", { cls: "dash-feedback-label", text: "How would you rate lilet_r3ad?" });
+    const ratingLabel = el("label", { cls: "dash-feedback-label", text: "How would you rate Lilet_r3ad?" });
     const msgLabel    = el("label", { cls: "dash-feedback-label", text: "Your message (optional)" });
 
     const sendBtn = el("button", {
@@ -744,19 +883,15 @@ export function renderDashboard(container) {
 
     const { close } = createModal(document.body, {
       title: "Leave feedback",
-      subtitle: "Help us make lilet_r3ad better 💬",
+      subtitle: "Help us make Lilet_r3ad better",
       body: [ratingLabel, ratingWrap, msgLabel, textarea],
       footerButtons: [cancelBtn, sendBtn],
     });
 
     cancelBtn.addEventListener("click", () => close());
     sendBtn.addEventListener("click", () => {
-      // For now, feedback is local-only (no server)
-      const fb = { rating, message: textarea.value.trim(), at: Date.now() };
-      console.info("Feedback submitted (local):", fb);
       close();
-      // Show a brief thank-you toast
-      _showToast("Thanks for your feedback! 🙏");
+      _showToast("Thanks for your feedback!");
     });
   }
 
@@ -774,12 +909,15 @@ export function renderDashboard(container) {
   // ── Empty state ────────────────────────────────────────────────────────────
   function _buildEmptyState() {
     const wrap = el("div", { cls: "dash-empty" });
-    const bot  = el("div", { cls: "dash-empty-mascot", text: "🤖", dirAuto: false });
+    const bot  = el("img", {
+      cls: "dash-empty-mascot",
+      attrs: { src: "/assets/Screenshot_2026-11-18_at_1.12.35_AM_4f655e17.png", alt: "Lilet_r3ad mascot" },
+    });
     const h2   = el("h2",  { cls: "dash-empty-heading", text: "Upload your first course" });
     const p    = el("p",   { cls: "dash-empty-desc",    text: "Drop a PDF, DOCX, or TXT file and your AI study partner will take it from there." });
 
     const btn = el("button", {
-      cls: "dash-new-btn btn-primary dash-empty-btn",
+      cls: "dash-new-btn dash-empty-btn",
       attrs: { type: "button", "aria-label": "New document" },
     });
     append(btn, _svgPlus(), el("span", { text: "New document" }));
@@ -799,18 +937,17 @@ function _buildThemeToggle() {
   const wrap  = el("div", { cls: "dash-theme-toggle", attrs: { role: "group", "aria-label": "Color theme" } });
   const track = el("div", { cls: "dash-theme-track" });
 
-  const isDark = () =>
-    document.documentElement.getAttribute("data-theme") === "dark" ||
-    (!document.documentElement.getAttribute("data-theme") &&
-      window.matchMedia("(prefers-color-scheme: dark)").matches);
+  const isDark = () => document.documentElement.getAttribute("data-theme") === "dark";
 
   const thumb = el("div", { cls: "dash-theme-thumb" });
-  const moonLabel = el("span", { cls: "dash-theme-icon", text: "🌙", dirAuto: false, attrs: { "aria-hidden": "true" } });
-  const sunLabel  = el("span", { cls: "dash-theme-icon", text: "☀️", dirAuto: false, attrs: { "aria-hidden": "true" } });
+  const moonLabel = el("span", { cls: "dash-theme-icon", attrs: { "aria-hidden": "true" } });
+  moonLabel.appendChild(_svgMoon());
+  const sunLabel  = el("span", { cls: "dash-theme-icon", attrs: { "aria-hidden": "true" } });
+  sunLabel.appendChild(_svgSun());
 
   function _sync() {
     track.classList.toggle("dash-theme-track--light", !isDark());
-    thumb.style.transform = isDark() ? "translateX(0)" : "translateX(28px)";
+    thumb.style.transform = isDark() ? "translateX(0)" : "translateX(20px)";
   }
   _sync();
   append(track, moonLabel, thumb, sunLabel);
@@ -837,10 +974,21 @@ function _svgBook() {
   const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
   svg.setAttribute("width", "18"); svg.setAttribute("height", "18");
   svg.setAttribute("viewBox", "0 0 24 24"); svg.setAttribute("fill", "none");
-  svg.setAttribute("stroke", "currentColor"); svg.setAttribute("stroke-width", "2.5");
+  svg.setAttribute("stroke", "currentColor"); svg.setAttribute("stroke-width", "2.2");
   svg.setAttribute("stroke-linecap", "round"); svg.setAttribute("stroke-linejoin", "round");
   svg.setAttribute("aria-hidden", "true"); svg.setAttribute("focusable", "false");
   svg.innerHTML = '<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>';
+  return svg;
+}
+
+function _svgHome() {
+  const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  svg.setAttribute("width", "18"); svg.setAttribute("height", "18");
+  svg.setAttribute("viewBox", "0 0 24 24"); svg.setAttribute("fill", "none");
+  svg.setAttribute("stroke", "currentColor"); svg.setAttribute("stroke-width", "2.2");
+  svg.setAttribute("stroke-linecap", "round"); svg.setAttribute("stroke-linejoin", "round");
+  svg.setAttribute("aria-hidden", "true"); svg.setAttribute("focusable", "false");
+  svg.innerHTML = '<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>';
   return svg;
 }
 
@@ -848,7 +996,7 @@ function _svgSearch() {
   const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
   svg.setAttribute("width", "18"); svg.setAttribute("height", "18");
   svg.setAttribute("viewBox", "0 0 24 24"); svg.setAttribute("fill", "none");
-  svg.setAttribute("stroke", "currentColor"); svg.setAttribute("stroke-width", "2.5");
+  svg.setAttribute("stroke", "currentColor"); svg.setAttribute("stroke-width", "2.2");
   svg.setAttribute("stroke-linecap", "round"); svg.setAttribute("stroke-linejoin", "round");
   svg.setAttribute("aria-hidden", "true"); svg.setAttribute("focusable", "false");
   svg.innerHTML = '<circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>';
@@ -859,7 +1007,7 @@ function _svgPlus() {
   const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
   svg.setAttribute("width", "18"); svg.setAttribute("height", "18");
   svg.setAttribute("viewBox", "0 0 24 24"); svg.setAttribute("fill", "none");
-  svg.setAttribute("stroke", "currentColor"); svg.setAttribute("stroke-width", "2.5");
+  svg.setAttribute("stroke", "currentColor"); svg.setAttribute("stroke-width", "2.4");
   svg.setAttribute("stroke-linecap", "round"); svg.setAttribute("stroke-linejoin", "round");
   svg.setAttribute("aria-hidden", "true"); svg.setAttribute("focusable", "false");
   svg.innerHTML = '<line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>';
@@ -870,7 +1018,7 @@ function _svgPencil() {
   const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
   svg.setAttribute("width", "15"); svg.setAttribute("height", "15");
   svg.setAttribute("viewBox", "0 0 24 24"); svg.setAttribute("fill", "none");
-  svg.setAttribute("stroke", "currentColor"); svg.setAttribute("stroke-width", "2.5");
+  svg.setAttribute("stroke", "currentColor"); svg.setAttribute("stroke-width", "2.2");
   svg.setAttribute("stroke-linecap", "round"); svg.setAttribute("stroke-linejoin", "round");
   svg.setAttribute("aria-hidden", "true"); svg.setAttribute("focusable", "false");
   svg.innerHTML = '<path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>';
@@ -881,7 +1029,7 @@ function _svgTrash() {
   const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
   svg.setAttribute("width", "15"); svg.setAttribute("height", "15");
   svg.setAttribute("viewBox", "0 0 24 24"); svg.setAttribute("fill", "none");
-  svg.setAttribute("stroke", "currentColor"); svg.setAttribute("stroke-width", "2.5");
+  svg.setAttribute("stroke", "currentColor"); svg.setAttribute("stroke-width", "2.2");
   svg.setAttribute("stroke-linecap", "round"); svg.setAttribute("stroke-linejoin", "round");
   svg.setAttribute("aria-hidden", "true"); svg.setAttribute("focusable", "false");
   svg.innerHTML = '<polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>';
@@ -892,9 +1040,42 @@ function _svgMenu() {
   const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
   svg.setAttribute("width", "22"); svg.setAttribute("height", "22");
   svg.setAttribute("viewBox", "0 0 24 24"); svg.setAttribute("fill", "none");
-  svg.setAttribute("stroke", "currentColor"); svg.setAttribute("stroke-width", "2.5");
+  svg.setAttribute("stroke", "currentColor"); svg.setAttribute("stroke-width", "2.2");
   svg.setAttribute("stroke-linecap", "round"); svg.setAttribute("stroke-linejoin", "round");
   svg.setAttribute("aria-hidden", "true"); svg.setAttribute("focusable", "false");
   svg.innerHTML = '<line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/>';
+  return svg;
+}
+
+function _svgUpload() {
+  const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  svg.setAttribute("width", "32"); svg.setAttribute("height", "32");
+  svg.setAttribute("viewBox", "0 0 24 24"); svg.setAttribute("fill", "none");
+  svg.setAttribute("stroke", "currentColor"); svg.setAttribute("stroke-width", "2");
+  svg.setAttribute("stroke-linecap", "round"); svg.setAttribute("stroke-linejoin", "round");
+  svg.setAttribute("aria-hidden", "true"); svg.setAttribute("focusable", "false");
+  svg.innerHTML = '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>';
+  return svg;
+}
+
+function _svgMoon() {
+  const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  svg.setAttribute("width", "12"); svg.setAttribute("height", "12");
+  svg.setAttribute("viewBox", "0 0 24 24"); svg.setAttribute("fill", "none");
+  svg.setAttribute("stroke", "currentColor"); svg.setAttribute("stroke-width", "2.2");
+  svg.setAttribute("stroke-linecap", "round"); svg.setAttribute("stroke-linejoin", "round");
+  svg.setAttribute("aria-hidden", "true"); svg.setAttribute("focusable", "false");
+  svg.innerHTML = '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>';
+  return svg;
+}
+
+function _svgSun() {
+  const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  svg.setAttribute("width", "12"); svg.setAttribute("height", "12");
+  svg.setAttribute("viewBox", "0 0 24 24"); svg.setAttribute("fill", "none");
+  svg.setAttribute("stroke", "currentColor"); svg.setAttribute("stroke-width", "2.2");
+  svg.setAttribute("stroke-linecap", "round"); svg.setAttribute("stroke-linejoin", "round");
+  svg.setAttribute("aria-hidden", "true"); svg.setAttribute("focusable", "false");
+  svg.innerHTML = '<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>';
   return svg;
 }

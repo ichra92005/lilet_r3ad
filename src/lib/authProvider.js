@@ -88,17 +88,19 @@ export function getAuthState() {
 
 
 export async function signIn(username, password) {
-  const email = `${username.toLowerCase()}@lilet-r3ad.app`;
+  const clean = username.trim().toLowerCase();
+  const email = clean.includes('@') ? clean : `${clean}@lilet-r3ad.app`;
   const { error } = await supabase.auth.signInWithPassword({ email, password });
   if (error) throw error;
 }
 
 export async function signUp(username, password) {
-  const email = `${username.toLowerCase()}@lilet-r3ad.app`;
+  const clean = username.trim().toLowerCase();
+  const email = clean.includes('@') ? clean : `${clean}@lilet-r3ad.app`;
   const { error } = await supabase.auth.signUp({
     email,
     password,
-    options: { data: { username } },
+    options: { data: { username: clean } },
   });
   if (error) throw error;
 }

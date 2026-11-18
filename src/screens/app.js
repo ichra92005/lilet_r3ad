@@ -8,7 +8,7 @@ import { el, append, empty } from "../utils/dom.js";
 import { loadCourse, saveCourse, clearCourse } from "../storage/store.js";
 import { processDocument } from "../document/pipeline.js";
 import { setCourse } from "../app/state.js";
-import { renderModePopup } from "../components/modal.js";
+import { renderModePopup, renderOutlineModal } from "../components/modal.js";
 
 export function renderApp(container) {
   container.className = "screen";
@@ -73,10 +73,10 @@ function _promptUpload(msgs, container) {
     return b;
   }
 
-  addBubble("assistant", "Hello! 👋 Upload your course (PDF, DOCX, or TXT) and I'll help you study it.");
+  addBubble("assistant", "Hello! Upload your course (PDF, DOCX, or TXT) and I'll help you study it.");
 
   // ── Drop zone / file picker ────────────────────────────────────────────
-  const zone = el("div", { cls: "drop-zone", text: "📂  Drag & drop your file here, or click to browse" });
+  const zone = el("div", { cls: "drop-zone", text: "Drag & drop your file here, or click to browse" });
   const fileInput = el("input", {
     cls: "sr-only",
     attrs: {
@@ -143,12 +143,18 @@ async function _handleFile(file, msgs, zone, fileInput, container) {
     setCourse(course);
 
     const n = course.sections?.length ?? course.parts?.length ?? 0;
-    status(`✅ Found ${n} section${n === 1 ? "" : "s"} in "${file.name}". Choose how you want to study:`);
+    status(`Found ${n} section${n === 1 ? "" : "s"} in "${file.name}". Review sections outline:`);
 
-    _showModePopup(container, course);
+    renderOutlineModal(document.body, course, {
+      onProceed: (finalCourse) => {
+        saveCourse(finalCourse);
+        setCourse(finalCourse);
+        _showModePopup(container, finalCourse);
+      },
+    });
   } catch (err) {
     console.error("processDocument error:", err);
-    status(`❌ Error: ${err.message}`);
+    status(`Error: ${err.message}`);
     // Re-show upload zone
     zone.style.display    = "";
     fileInput.style.display = "";

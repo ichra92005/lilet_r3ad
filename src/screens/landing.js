@@ -40,7 +40,7 @@ function goGuest() {
   navigate("/dashboard");
 }
 function goLogin() {
-  navigate("/dashboard");
+  navigate("/login");
 }
 
 /* ── build ─────────────────────────────────────────────────────── */
@@ -51,7 +51,7 @@ export function renderLanding(container) {
   const bgDiv = h("div", "landing-bg");
   bgDiv.setAttribute("aria-hidden", "true");
   const bgImg = h("img", "landing-bg-img");
-  bgImg.src = "/assets/aistudio/___3__26dcc747.jpeg";
+  bgImg.src = "/assets/___3__26dcc747.jpeg";
   bgImg.alt = "";
   bgImg.onerror = () => { bgImg.style.display = "none"; };
   const bgOverlay = h("div", "landing-bg-overlay");
@@ -66,9 +66,9 @@ export function renderLanding(container) {
   const brand = h("a", "landing-brand");
   brand.href = "#/";
   const brandImg = h("img", "landing-brand-img");
-  brandImg.src = "/assets/aistudio/Screenshot_2026-11-18_at_1.12.35_AM_4f655e17.png";
+  brandImg.src = "/assets/aistudio/side.png";
   brandImg.alt = "";
-  const brandText = h("span", "", { text: "Lilet_r3ad" });
+  const brandText = h("span", "", { text: "Lilet Raad" });
   brand.append(brandImg, brandText);
 
   // Nav links
@@ -106,9 +106,9 @@ export function renderLanding(container) {
   // Brand badge
   const heroBadge = h("div", "landing-hero-badge");
   const heroBadgeImg = h("img", "landing-hero-badge-img");
-  heroBadgeImg.src = "/assets/aistudio/Screenshot_2026-11-18_at_1.12.35_AM_4f655e17.png";
+  heroBadgeImg.src = "/assets/aistudio/side.png";
   heroBadgeImg.alt = "";
-  const heroBadgeText = h("p", "landing-hero-badge-text", { text: "Lilet_r3ad" });
+  const heroBadgeText = h("p", "landing-hero-badge-text", { text: "Lilet Raad" });
   heroBadge.append(heroBadgeImg, heroBadgeText);
 
   const heroSubBadge = h("p", "landing-hero-sub-badge", { text: "YOUR LEARNING SPACE" });
@@ -144,8 +144,8 @@ export function renderLanding(container) {
   // Right column – mascot
   const heroRight = h("div", "landing-hero-right");
   const mascot = h("img", "landing-mascot");
-  mascot.src = "/assets/aistudio/Screenshot_2026-11-18_at_1.12.35_AM_4f655e17.png";
-  mascot.alt = "Lilet_r3ad smiling star mascot";
+  mascot.src = "/assets/aistudio/side.png";
+  mascot.alt = "Lilet Raad smiling star mascot";
   heroRight.appendChild(mascot);
 
   heroGrid.append(heroLeft, heroRight);
@@ -158,7 +158,7 @@ export function renderLanding(container) {
   strip.setAttribute("aria-label", "Study workspace highlights");
   const stripInner = h("div", "landing-strip-inner");
 
-  const stripBrand = h("span", "landing-strip-brand", { text: "Lilet_r3ad · Learning Space" });
+  const stripBrand = h("span", "landing-strip-brand", { text: "Lilet Raad · Learning Space" });
 
   const sloganBtn = h("button", "landing-slogan-btn", { type: "button" });
   sloganBtn.textContent = `"${SLOGANS[sloganIdx]}"`;
@@ -171,18 +171,19 @@ export function renderLanding(container) {
   const stripActions = h("div", "landing-strip-actions");
   // LinkedIn
   const linkedIn = h("a", "landing-strip-link");
-  linkedIn.href = "https://www.linkedin.com";
+  linkedIn.href = "https://www.linkedin.com/in/ichrak-nour-elhouda-belkahla-478a5b2b2/";
   linkedIn.target = "_blank";
   linkedIn.rel = "noopener noreferrer";
   linkedIn.innerHTML = `<span>LinkedIn</span>`;
   // Email
   const emailLink = h("a", "landing-strip-link");
-  emailLink.href = "mailto:ichraknour22@gmail.com";
+  emailLink.href = "mailto:ichraknour22@gmail.com?subject=Feedback";
   emailLink.innerHTML = `<span>Email</span>`;
   // Contact
   const contactBtn = h("button", "landing-btn-primary landing-btn-xs", { text: "Contact Us", type: "button" });
+stripActions.append(linkedIn, emailLink, contactBtn);
 
-  stripActions.append(linkedIn, emailLink, contactBtn);
+  contactBtn.addEventListener("click", () => { window.location.href = "mailto:ichraknour22@gmail.com?subject=Feedback"; });
   stripInner.append(stripBrand, sloganBtn, stripActions);
   strip.appendChild(stripInner);
   main.appendChild(strip);
@@ -261,12 +262,12 @@ export function renderLanding(container) {
 
   const footerBrand = h("div", "landing-footer-brand");
   const footerBrandImg = h("img", "landing-footer-brand-img");
-  footerBrandImg.src = "/assets/aistudio/Screenshot_2026-11-18_at_1.12.35_AM_4f655e17.png";
+  footerBrandImg.src = "/assets/aistudio/p2logo3_ba527f4c.png";
   footerBrandImg.alt = "";
   footerBrand.innerHTML = "";
   footerBrand.append(
     footerBrandImg,
-    h("span", "landing-footer-name", { text: "Lilet_r3ad" }),
+    h("span", "landing-footer-name", { text: "Lilet Raad" }),
     h("span", "", { text: "·", "aria-hidden": "true" }),
     h("span", "landing-footer-sub", { text: "Your Learning Space" })
   );

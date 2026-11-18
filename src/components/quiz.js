@@ -66,10 +66,12 @@ export function createQuiz(initialQuestions, { onComplete, onSkip, onNextChapter
         },
       });
 
-      const icon = el("span", {
-        text: isPerfect ? "🎉" : pct >= 60 ? "👏" : "📚",
-        attrs: { style: "font-size:3rem;" },
-        dirAuto: false,
+      const icon = el("img", {
+        attrs: {
+          src: "/assets/aistudio/student_2f90309c.png",
+          alt: "Student mascot",
+          style: "width:60px;height:60px;object-fit:contain;border-radius:50%;background:rgba(123,179,211,0.2);padding:4px;",
+        },
       });
 
       const heading = el("h3", {
@@ -100,7 +102,7 @@ export function createQuiz(initialQuestions, { onComplete, onSkip, onNextChapter
 
       const redoBtn = el("button", {
         cls: "btn btn-outline",
-        text: "Redo Quiz 🔄",
+        text: "Redo Quiz",
         attrs: {
           type: "button",
           "aria-label": "Redo quiz with changed arrangement",
@@ -218,7 +220,7 @@ export function createQuiz(initialQuestions, { onComplete, onSkip, onNextChapter
         }
 
         if (cur.explanation) {
-          explanationEl.textContent = `💡 Explanation: ${cur.explanation}`;
+          explanationEl.textContent = `Explanation: ${cur.explanation}`;
           explanationEl.style.display = "block";
         }
 
@@ -228,7 +230,7 @@ export function createQuiz(initialQuestions, { onComplete, onSkip, onNextChapter
 
         const nextBtn = el("button", {
           cls: "btn btn-primary",
-          text: index + 1 === questions.length ? "See Score & Finish 🏁" : "Next Question →",
+          text: index + 1 === questions.length ? "See Score & Finish →" : "Next Question →",
           attrs: { type: "button" },
         });
         nextBtn.addEventListener("click", () => {

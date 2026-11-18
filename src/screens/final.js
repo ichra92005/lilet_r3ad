@@ -24,7 +24,13 @@ export function renderFinal(container) {
 
   append(
     wrap,
-    el("span", { text: "🎓", attrs: { style: "font-size:3.5rem;" }, dirAuto: false }),
+    el("img", {
+      attrs: {
+        src: "/assets/aistudio/student_2f90309c.png",
+        alt: "Course completed celebration",
+        style: "width:72px;height:72px;object-fit:contain;border-radius:50%;background:rgba(123,179,211,0.2);padding:6px;margin-bottom:8px;",
+      },
+    }),
     el("h2", { text: "Course Completed!" }),
     el("p", { cls: "text-muted", text: `Great job completing the course "${course.name}". You are ready for the final review.` })
   );
@@ -45,7 +51,14 @@ export function renderFinal(container) {
   });
   newCourseBtn.addEventListener("click", () => navigate("/app"));
 
-  append(actions, teacherBtn, newCourseBtn);
+  const backDashBtn = el("button", {
+    cls: "btn btn-outline",
+    text: "← Back to Dashboard",
+    attrs: { type: "button" },
+  });
+  backDashBtn.addEventListener("click", () => navigate("/dashboard"));
+
+  append(actions, teacherBtn, newCourseBtn, backDashBtn);
   wrap.appendChild(actions);
 
   container.appendChild(wrap);

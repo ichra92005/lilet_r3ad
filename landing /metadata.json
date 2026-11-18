@@ -1,6 +1,0 @@
-{
-  "name": "Lilet_r3ad",
-  "description": "Your little space to organise your ideas, study smarter and make learning easier. Learn, Create & Grow!",
-  "requestFramePermissions": [],
-  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
-}

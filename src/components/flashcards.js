@@ -74,7 +74,7 @@ export function createFlashcardDeck(cards, { onComplete, onClose } = {}) {
   });
 
   const flipHint = el("span", {
-    text: "Tap or click to flip 🔄",
+    text: "Tap or click to flip",
     attrs: {
       style: "font-size:0.75rem;opacity:0.75;margin-bottom:8px;font-weight:600;letter-spacing:0.5px;text-transform:uppercase;",
     },
@@ -89,7 +89,7 @@ export function createFlashcardDeck(cards, { onComplete, onClose } = {}) {
 
   const flip = () => {
     isFlipped = !isFlipped;
-    flipHint.textContent = isFlipped ? "Answer / Back 💡 (tap to flip)" : "Question / Front ❓ (tap to flip)";
+    flipHint.textContent = isFlipped ? "Answer / Back (tap to flip)" : "Question / Front (tap to flip)";
     content.textContent = isFlipped ? cards[index].back : cards[index].front;
     cardBox.style.transform = isFlipped ? "rotateY(0deg) scale(1.02)" : "rotateY(0deg) scale(1)";
   };
@@ -108,7 +108,7 @@ export function createFlashcardDeck(cards, { onComplete, onClose } = {}) {
 
   const flipBtn = el("button", {
     cls: "btn btn-outline btn-sm",
-    text: "Flip card 🔄",
+    text: "Flip card",
     attrs: { type: "button" },
   });
   flipBtn.addEventListener("click", flip);
@@ -146,7 +146,13 @@ export function createFlashcardDeck(cards, { onComplete, onClose } = {}) {
 
       append(
         done,
-        el("span", { text: "🎉", attrs: { style: "font-size:3rem;" }, dirAuto: false }),
+        el("img", {
+          attrs: {
+            src: "/assets/aistudio/student_2f90309c.png",
+            alt: "Student mascot",
+            style: "width:64px;height:64px;object-fit:contain;border-radius:50%;background:rgba(123,179,211,0.2);padding:4px;",
+          },
+        }),
         el("h4", { text: "Flashcards completed!", attrs: { style: "font-size:1.3rem;color:var(--text);" } }),
         el("p", {
           cls: "text-muted",
@@ -157,7 +163,7 @@ export function createFlashcardDeck(cards, { onComplete, onClose } = {}) {
       const reviewRow = el("div", { attrs: { style: "display:flex;gap:10px;margin-top:8px;" } });
       const restartBtn = el("button", {
         cls: "btn btn-outline btn-sm",
-        text: "Review Again 🔄",
+        text: "Review Again",
         attrs: { type: "button" },
       });
       restartBtn.addEventListener("click", () => {
@@ -185,7 +191,7 @@ export function createFlashcardDeck(cards, { onComplete, onClose } = {}) {
     }
 
     isFlipped = false;
-    flipHint.textContent = "Tap or click to flip 🔄";
+    flipHint.textContent = "Tap or click to flip";
     content.textContent = cards[index].front;
     cardBox.style.transform = "none";
     counter.textContent = `Card ${index + 1} of ${cards.length}`;

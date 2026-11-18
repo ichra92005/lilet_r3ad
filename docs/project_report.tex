@@ -1,0 +1,188 @@
+\documentclass[12pt,a4paper]{article}
+
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{hyperref}
+\usepackage{enumitem}
+\usepackage{booktabs}
+
+\hypersetup{
+  colorlinks=true,
+  linkcolor=blue,
+  urlcolor=blue
+}
+
+\title{\textbf{Lilet\_r3ad} \\ \large AI-Powered Study Assistant --- Project Report}
+\author{Project: lilet\_r3ad \\ Version: 0.1.0}
+\date{November 2026}
+
+\begin{document}
+
+\maketitle
+\tableofcontents
+\newpage
+
+%% ─────────────────────────────────────────────────────────────
+\section{Overview}
+
+Lilet\_r3ad is a browser-based AI study assistant that runs entirely on the client
+side. Users upload course documents (PDF, DOCX, or plain text), and the application
+automatically builds a structured outline, generates flashcard sets, creates
+multiple-choice quizzes, and opens an AI tutor chat --- all without sending document
+content to external servers. The AI model is downloaded once and cached in the
+browser via IndexedDB; every inference call runs locally through WebGPU.
+
+The application supports two usage modes: authenticated users (Supabase Auth) and
+guest users who bypass authentication and store progress only in
+\texttt{sessionStorage}. A Teacher mode allows instructors to create and share
+course packages, while a Study Partner mode pairs learners for collaborative review.
+
+%% ─────────────────────────────────────────────────────────────
+\section{Technology Stack}
+
+\begin{table}[h]
+\centering
+\begin{tabular}{@{}ll@{}}
+\toprule
+\textbf{Layer} & \textbf{Technology} \\
+\midrule
+Language          & JavaScript (ES Modules, no transpilation) \\
+Build tool        & Vite 8.3.6 \\
+Runtime           & Browser (no Node.js at runtime) \\
+AI inference      & @mlc-ai/web-llm 0.2.88 (WebGPU, Web Worker) \\
+AI model          & \texttt{Qwen2.5-1.5B-Instruct-q4f16\_1-MLC} \\
+Auth \& database  & @supabase/supabase-js 2.119.0 \\
+Styling           & Custom CSS (design tokens, no CSS framework) \\
+Routing           & Hash-based router (custom, no library) \\
+Testing           & Node.js built-in test runner (\texttt{node --test}) \\
+Hosting           & Not specified in source code \\
+\bottomrule
+\end{tabular}
+\caption{Full technology stack derived from \texttt{package.json} and source files.}
+\end{table}
+
+%% ─────────────────────────────────────────────────────────────
+\section{AI Model}
+
+The application uses \textbf{Qwen2.5-1.5B-Instruct-q4f16\_1-MLC}, a 1.5-billion
+parameter instruction-tuned language model quantised to 4-bit floating point
+(q4f16). The model identifier is defined as the constant \texttt{MODEL\_ID} in
+\texttt{src/app/config.js} and consumed by \texttt{src/core/engine.js}.
+
+Inference is executed in a dedicated Web Worker via
+\texttt{CreateWebWorkerMLCEngine} from the \texttt{@mlc-ai/web-llm} package,
+keeping the main thread unblocked during generation. A priority queue serialises
+concurrent generation requests, giving user-initiated prompts priority over
+background pre-generation tasks (flashcards, quizzes).
+
+The model weights are fetched from the MLC CDN on first launch and stored
+persistently in the browser's IndexedDB. The application calls
+\texttt{navigator.storage.persist()} to prevent the browser from evicting cached
+weights.
+
+%% ─────────────────────────────────────────────────────────────
+\section{User Journey}
+
+\begin{enumerate}[leftmargin=*, label=\arabic*.]
+  \item \textbf{Landing page} (\texttt{\#/}) --- The user sees the product hero,
+        feature highlights, and two entry points: \emph{Log in} and
+        \emph{Continue as Guest}.
+  \item \textbf{Authentication} (\texttt{\#/login}) --- The user enters a
+        username and password. Alternatively, they click \emph{Continue as Guest}
+        to skip auth (see Section~\ref{sec:login}).
+  \item \textbf{Dashboard} (\texttt{\#/dashboard}) --- The user sees their
+        document library. Clicking \emph{New document} opens a compact upload
+        modal accepting PDF, DOCX, or TXT files.
+  \item \textbf{Document processing} (\texttt{\#/app}) --- After upload, the app
+        parses the document, splits it into sections using a structure-aware
+        splitter (\texttt{src/document/}), and renders an interactive outline.
+  \item \textbf{Mode selection} --- The user picks a study mode:
+        \begin{itemize}
+          \item \textbf{Teacher} (\texttt{\#/teacher}) --- AI-guided walkthrough
+                with tutor chat per section.
+          \item \textbf{Study Partner} (\texttt{\#/path}) --- Collaborative
+                flashcard and quiz review.
+        \end{itemize}
+  \item \textbf{Final review} (\texttt{\#/final}) --- Summary of completed
+        sections, quiz scores, and progress statistics.
+\end{enumerate}
+
+%% ─────────────────────────────────────────────────────────────
+\section{Database Schema}
+\label{sec:db}
+
+The application uses Supabase (PostgreSQL) with one confirmed table:
+
+\begin{table}[h]
+\centering
+\begin{tabular}{@{}lll@{}}
+\toprule
+\textbf{Table} & \textbf{Column} & \textbf{Notes} \\
+\midrule
+\texttt{profiles} & \texttt{id}           & Foreign key → \texttt{auth.users.id} \\
+                   & \texttt{username}     & Unique display handle chosen at sign-up \\
+                   & \texttt{display\_name} & Full name or preferred name \\
+\bottomrule
+\end{tabular}
+\caption{Database tables confirmed from \texttt{src/lib/authProvider.js}.
+         No additional tables were found in the source code.}
+\end{table}
+
+Document data, generated flashcards, quiz results, and learning progress are
+stored client-side only: in \texttt{localStorage} (authenticated users) or
+\texttt{sessionStorage} (guest users), keyed by the constants defined in
+\texttt{src/app/config.js}.
+
+%% ─────────────────────────────────────────────────────────────
+\section{Login Flow}
+\label{sec:login}
+
+\begin{enumerate}[leftmargin=*, label=\arabic*.]
+  \item The user enters a \textbf{username} (not an email address) and password
+        on the login screen.
+  \item The client converts the username to a synthetic email address:
+        \[
+          \texttt{toInternalEmail(username)} = \texttt{username.toLowerCase()} +
+          \texttt{"@lilet-r3ad.app"}
+        \]
+        This transformation is applied identically during both sign-up and
+        sign-in in \texttt{src/lib/authProvider.js}.
+  \item Supabase Auth validates the credentials against the \texttt{auth.users}
+        table using the synthetic email.
+  \item On success, \texttt{onAuthStateChange} fires, the router navigates to
+        \texttt{\#/dashboard}, and the user's profile is fetched from the
+        \texttt{profiles} table.
+  \item \textbf{Guest mode}: clicking \emph{Continue as Guest} calls
+        \texttt{enterGuestMode()}, which writes \texttt{guest=1} to
+        \texttt{sessionStorage} and navigates directly to the dashboard without
+        any Supabase call.
+\end{enumerate}
+
+\noindent\textbf{Supabase requirement}: the \emph{Confirm email} setting must be
+\textbf{disabled} in the Supabase Auth dashboard. Because usernames are mapped to
+synthetic \texttt{@lilet-r3ad.app} addresses that do not receive real email,
+confirmation links would never be delivered.
+
+%% ─────────────────────────────────────────────────────────────
+\section{Limitations}
+
+\begin{itemize}[leftmargin=*]
+  \item \textbf{Browser-only storage}: document content, flashcards, and quiz
+        progress are stored in \texttt{localStorage}/\texttt{sessionStorage}.
+        Clearing browser data permanently deletes all study progress.
+  \item \textbf{Model load time}: the Qwen2.5 model (~1~GB) must be downloaded
+        on first launch. On slow connections or low-end devices this takes several
+        minutes.
+  \item \textbf{WebGPU requirement}: the AI engine uses WebGPU, which is only
+        available in desktop Chrome and Edge. Mobile browsers and Firefox are not
+        supported for AI features.
+  \item \textbf{No password reset}: no password-reset or ``forgot password'' flow
+        was found in the source code.
+  \item \textbf{Single-document study}: the application processes one document at
+        a time; there is no multi-document or cross-document study mode.
+  \item \textbf{Supabase email confirmation}: must be disabled manually in the
+        Supabase dashboard; this is not enforced automatically.
+  \item \textbf{Hosting}: no deployment configuration (Vercel, Netlify, Docker,
+        etc.) was found in the source code.
+\end{itemize}
+
+\end{document}

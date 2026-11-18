@@ -17,6 +17,7 @@ import { renderApp }       from "./screens/app.js";
 import { renderTeacher }   from "./screens/teacher.js";
 import { renderPath }      from "./screens/path.js";
 import { renderFinal }     from "./screens/final.js";
+import { renderLogin }     from "./screens/login.js";
 
 // Global error handler
 window.addEventListener("error", (event) => {
@@ -64,7 +65,7 @@ if (savedTheme) {
 const appHeader = el("header", { cls: "app-header", attrs: { style: "display:none;" } });
 const logo = el("a", {
   cls: "app-header-logo",
-  text: "lilet_r3ad",
+  text: "lilet Raad",
   attrs: { href: "#/", "aria-label": "lilet_r3ad Home" },
 });
 const statusChip = createStatusChip();
@@ -99,7 +100,14 @@ newCourseBtn.addEventListener("click", () => {
   navigate("/app");
 });
 
-append(appHeader, logo, statusChip, themeToggleBtn, newCourseBtn);
+const backToDashBtn = el("button", {
+  cls: "btn btn-outline btn-sm",
+  text: "← Dashboard",
+  attrs: { type: "button", "aria-label": "Back to Dashboard" },
+});
+backToDashBtn.addEventListener("click", () => navigate("/dashboard"));
+
+append(appHeader, logo, statusChip, themeToggleBtn, backToDashBtn, newCourseBtn);
 
 const screenOutlet = el("main", { cls: "screen-outlet", attrs: { id: "screen-container", style: "flex:1;display:flex;flex-direction:column;min-height:0;" } });
 
@@ -110,11 +118,13 @@ append(appContainer, appHeader, screenOutlet);
 onRoute((route) => {
   empty(screenOutlet);
 
-  // Show header on screens 2-5, hide on landing and dashboard (which has its own header)
-  if (route === "/" || route === "" || route === "/dashboard") {
+  // Show header on screens 2-5, hide on landing, dashboard, and login
+  if (route === "/" || route === "" || route === "/dashboard" || route === "/login") {
     appHeader.style.display = "none";
     if (route === "/dashboard") {
       renderDashboard(screenOutlet);
+    } else if (route === "/login") {
+      renderLogin(screenOutlet);
     } else {
       renderLanding(screenOutlet);
     }

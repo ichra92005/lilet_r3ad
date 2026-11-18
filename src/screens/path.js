@@ -113,9 +113,17 @@ function _renderOverview(container, course, sections, progress, { onStartChapter
     attrs: { style: "display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;padding:24px;" },
   });
 
-  const titleGroup = el("div", { attrs: { style: "flex:1;min-width:240px;" } });
+  const titleGroup = el("div", { attrs: { style: "flex:1;min-width:240px;display:flex;align-items:center;gap:16px;" } });
+  const studentMascot = el("img", {
+    attrs: {
+      src: "/assets/aistudio/student_2f90309c.png",
+      alt: "Study partner mascot",
+      style: "width:48px;height:48px;object-fit:contain;border-radius:50%;background:rgba(123,179,211,0.2);padding:3px;flex-shrink:0;",
+    },
+  });
+  const titleInfo = el("div", { attrs: { style: "flex:1;min-width:0;" } });
   append(
-    titleGroup,
+    titleInfo,
     el("div", {
       cls: "badge badge-sky",
       text: "Study Partner",
@@ -131,6 +139,7 @@ function _renderOverview(container, course, sections, progress, { onStartChapter
       text: `Step-by-step learning path • ${sections.length} chapter${sections.length === 1 ? "" : "s"} to complete`,
     })
   );
+  append(titleGroup, studentMascot, titleInfo);
 
   const navActions = el("div", { attrs: { style: "display:flex;gap:10px;align-items:center;" } });
   const backChatBtn = el("button", {
@@ -139,7 +148,16 @@ function _renderOverview(container, course, sections, progress, { onStartChapter
     attrs: { type: "button", "aria-label": "Back to chat" },
   });
   backChatBtn.addEventListener("click", () => navigate("/teacher"));
+
+  const backDashBtn = el("button", {
+    cls: "btn btn-outline btn-sm",
+    text: "Dashboard",
+    attrs: { type: "button", "aria-label": "Back to dashboard" },
+  });
+  backDashBtn.addEventListener("click", () => navigate("/dashboard"));
+
   navActions.appendChild(backChatBtn);
+  navActions.appendChild(backDashBtn);
 
   append(headerCard, titleGroup, navActions);
   wrap.appendChild(headerCard);
@@ -157,8 +175,8 @@ function _renderOverview(container, course, sections, progress, { onStartChapter
   const targetIdx = sections.findIndex((s) => s.id === targetSection.id);
   const isStarted = progress.completedSectionIds.length > 0;
   const startBtnLabel = isStarted
-    ? `▶ Continue Learning (Chapter ${targetIdx + 1})`
-    : `🚀 Start Learning (Chapter 1)`;
+    ? `Continue Learning (Chapter ${targetIdx + 1}) →`
+    : `Start Learning (Chapter 1) →`;
 
   const mainActionsCard = el("div", {
     cls: "card path-actions-card",
@@ -183,7 +201,7 @@ function _renderOverview(container, course, sections, progress, { onStartChapter
   // "falsh card" button next to Start button
   const flashcardBtn = el("button", {
     cls: "btn btn-peach btn-flashcard",
-    text: "🗂️ Flashcards",
+    text: "Flashcards",
     attrs: {
       type: "button",
       style:
@@ -346,7 +364,7 @@ function _renderOverview(container, course, sections, progress, { onStartChapter
   append(
     progressLabels,
     el("span", {
-      text: isAllComplete ? "🏆 Entire Course Completed!" : "Overall Course Progress",
+      text: isAllComplete ? "Entire Course Completed!" : "Overall Course Progress",
       attrs: { style: "font-weight:700;color:var(--text);" },
     }),
     el("span", {
@@ -370,7 +388,7 @@ function _renderOverview(container, course, sections, progress, { onStartChapter
 
   if (isAllComplete) {
     const congrats = el("p", {
-      text: "🎉 Outstanding! All quizzes are completed and every chapter is checked at 100%.",
+      text: "Outstanding! All quizzes are completed and every chapter is checked at 100%.",
       attrs: {
         style: "color:var(--success);font-weight:600;font-size:0.9rem;text-align:center;margin-top:6px;",
       },
@@ -441,7 +459,7 @@ function _renderChapterView(container, section, sections, progress, { onBack, on
   });
   append(
     docHeader,
-    el("h3", { text: "📄 Original Document Text", attrs: { style: "font-size:1.15rem;color:var(--text);" } }),
+    el("h3", { text: "Original Document Text", attrs: { style: "font-size:1.15rem;color:var(--text);" } }),
     el("span", {
       cls: "badge",
       text: `${section.text?.length || 0} characters`,
@@ -472,7 +490,7 @@ function _renderChapterView(container, section, sections, progress, { onBack, on
   });
   append(
     explHeader,
-    el("h3", { text: "💡 Explanation & Key Concepts", attrs: { style: "font-size:1.15rem;color:var(--text);" } }),
+    el("h3", { text: "Explanation & Key Concepts", attrs: { style: "font-size:1.15rem;color:var(--text);" } }),
     el("span", {
       cls: "badge",
       text: "Bite-Sized Breakdown",
@@ -530,7 +548,7 @@ function _renderChapterView(container, section, sections, progress, { onBack, on
     });
     append(
       takeawayBox,
-      el("strong", { text: "📌 Key Takeaway: " }),
+      el("strong", { text: "Key Takeaway: " }),
       el("span", { text: explanationData.coreConcept })
     );
     explBody.appendChild(takeawayBox);
@@ -570,7 +588,7 @@ function _renderChapterView(container, section, sections, progress, { onBack, on
 
   const nextChapterLabel = nextSec
     ? `Next Chapter: Chapter ${secIdx + 2} →`
-    : "Finish Course 🎉";
+    : "Finish Course →";
 
   const quizCard = createQuiz(questions, {
     nextLabel: nextChapterLabel,
@@ -648,7 +666,7 @@ function _openCourseFlashcards(parent, sections) {
   });
 
   modal = createModal(parent, {
-    title: "Course Flashcards 🗂️",
+    title: "Course Flashcards",
     subtitle: "Study and review key concepts across all chapters",
     body: deck,
   });

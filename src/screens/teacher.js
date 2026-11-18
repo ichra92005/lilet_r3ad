@@ -7,11 +7,12 @@
  */
 import { navigate }  from "../app/router.js";
 import { el, append, empty } from "../utils/dom.js";
-import { loadCourse, clearCourse } from "../storage/store.js";
+import { loadCourse, clearCourse, saveCourse } from "../storage/store.js";
 import { searchParts } from "../document/search.js";
 import { buildTutorMessages, GENERATION_SETTINGS } from "../core/prompts.js";
 import { generate, getStatus, whenReady, onStatus } from "../core/engine.js";
 import { getCourse, setCourse } from "../app/state.js";
+import { renderUploadModal } from "../components/modal.js";
 
 export function renderTeacher(container) {
   container.className = "screen";
@@ -51,7 +52,7 @@ export function renderTeacher(container) {
   let generating = false;
 
   // Welcome message
-  _addBubble(msgs, "assistant", `📖 Loaded "${course.name}". Ask me anything about it!`);
+  _addBubble(msgs, "assistant", `Loaded "${course.name}". Ask me anything about it!`);
 
   // ── Helpers ─────────────────────────────────────────────────────────────
   function _addBubble(container, role, text, source) {
@@ -200,6 +201,27 @@ function _getSections(course) {
 }
 
 function _buildSidebar(sidebar, course, parts) {
+  // Teacher Mode Header Badge with teacher mascot
+  const teacherBadge = el("div", {
+    cls: "teacher-sidebar-badge",
+    attrs: {
+      style: "display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:12px;",
+    },
+  });
+  const teacherMascot = el("img", {
+    attrs: {
+      src: "/assets/aistudio/teacher_58a6face.png",
+      alt: "Teacher Mascot",
+      style: "width:38px;height:38px;object-fit:contain;border-radius:50%;background:rgba(238,200,160,0.25);padding:2px;flex-shrink:0;",
+    },
+  });
+  const teacherInfo = el("div", { attrs: { style: "flex:1;min-width:0;" } });
+  const teacherHeading = el("div", { text: "Teacher Mode", attrs: { style: "font-weight:700;font-size:0.95rem;color:var(--text);" } });
+  const teacherSub = el("div", { text: "AI Course Tutor", attrs: { style: "font-size:0.78rem;color:var(--muted);" } });
+  append(teacherInfo, teacherHeading, teacherSub);
+  append(teacherBadge, teacherMascot, teacherInfo);
+  sidebar.appendChild(teacherBadge);
+
   // Doc card
   const docCard = el("div", { cls: "card card-sm section-doc" });
 
@@ -207,11 +229,19 @@ function _buildSidebar(sidebar, course, parts) {
   const title = el("h2", { text: "Document", dirAuto: false, cls: "" });
   title.style.cssText = "font-size:1rem;font-weight:700;";
 
-  const clearBtn = el("button", { cls: "btn btn-outline btn-sm", text: "New course", attrs: { type: "button" } });
+  const clearBtn = el("button", {
+    cls: "btn btn-primary teacher-new-course-btn",
+    text: "+ New course",
+    attrs: { type: "button", "aria-label": "Upload a new course" },
+  });
   clearBtn.addEventListener("click", () => {
-    clearCourse();
-    setCourse(null);
-    navigate("/app");
+    renderUploadModal(document.body, {
+      onComplete: (newCourse) => {
+        setCourse(newCourse);
+        saveCourse(newCourse);
+        navigate("/teacher");
+      },
+    });
   });
   append(hdr, title, clearBtn);
 
@@ -232,14 +262,32 @@ function _buildSidebar(sidebar, course, parts) {
   append(docCard, hdr, name, partsHdr, list);
   sidebar.appendChild(docCard);
 
-  // Study partner button
+  // Study partner button — larger with student mascot and arrow
   const switchBtn = el("button", {
-    cls: "btn btn-outline btn-sm",
-    text: "Study partner →",
-    attrs: { type: "button", style: "width:100%;" },
+    cls: "btn teacher-study-partner-btn",
+    attrs: { type: "button", "aria-label": "Switch to Study partner mode" },
   });
+  const partnerImg = el("img", {
+    cls: "teacher-partner-img",
+    attrs: {
+      src: "/assets/aistudio/student_2f90309c.png",
+      alt: "Study partner mascot",
+    },
+  });
+  const partnerLabel = el("span", { cls: "teacher-partner-label", text: "Study partner" });
+  const partnerArrow = el("span", { cls: "teacher-partner-arrow", text: "→", dirAuto: false });
+  append(switchBtn, partnerImg, partnerLabel, partnerArrow);
   switchBtn.addEventListener("click", () => navigate("/path"));
   sidebar.appendChild(switchBtn);
+
+  // Back to Dashboard
+  const backDashBtn = el("button", {
+    cls: "btn btn-outline btn-sm",
+    text: "← Dashboard",
+    attrs: { type: "button", style: "width:100%;margin-top:6px;justify-content:center;" },
+  });
+  backDashBtn.addEventListener("click", () => navigate("/dashboard"));
+  sidebar.appendChild(backDashBtn);
 }
 
 function _makePartItem(part) {
