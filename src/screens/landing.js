@@ -5,7 +5,6 @@
  * connects "Get Started" / "Guest" to the app's existing router.
  */
 import { navigate } from "../app/router.js";
-import { enterGuestMode } from "../lib/authProvider.js";
 
 /* ── tiny helpers ──────────────────────────────────────────────── */
 const h = (tag, cls, attrs = {}) => {
@@ -36,7 +35,6 @@ function goGetStarted() {
   navigate("/dashboard");
 }
 function goGuest() {
-  enterGuestMode();
   navigate("/dashboard");
 }
 /* ── build ─────────────────────────────────────────────────────── */

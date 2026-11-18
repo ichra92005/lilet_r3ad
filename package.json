@@ -14,7 +14,6 @@
     "vite": "^8.3.6"
   },
   "dependencies": {
-    "@mlc-ai/web-llm": "^0.2.88",
-    "@supabase/supabase-js": "^2.119.0"
+    "@mlc-ai/web-llm": "^0.2.88"
   }
 }
