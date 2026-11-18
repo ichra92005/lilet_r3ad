@@ -3,24 +3,20 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="icon" href="data:," />
-    <title>lilet_r3ad</title>
+    <link rel="icon" href="/favicon.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/src/styles/base.css" />
+    <link rel="stylesheet" href="/src/styles/components.css" />
+    <link rel="stylesheet" href="/src/styles/dashboard.css" />
+    <title>lilet_r3ad - Browser AI Study Helper</title>
   </head>
   <body>
-    <div id="app">
-      <h1>lilet_r3ad</h1>
-      <button id="load">Load model</button>
-      <p id="status">Not loaded</p>
-
-      <h3>Document (paste text here)</h3>
-      <textarea id="doc" rows="8" cols="70"></textarea>
-
-      <h3>Question (optional)</h3>
-      <input id="question" size="70" placeholder="Leave empty to get a simple explanation of the document" /><br /><br />
-
-      <button id="ask" disabled>Explain</button>
-      <pre id="output" style="white-space: pre-wrap"></pre>
-    </div>
+    <div id="app"></div>
     <script type="module" src="/src/main.js"></script>
   </body>
 </html>

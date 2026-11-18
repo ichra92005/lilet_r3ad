@@ -1,0 +1,1881 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>📱 Android Development - Complete Study Guide</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Sora:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0f1e;
+    --surface: #111827;
+    --surface2: #1a2236;
+    --border: #1e2d4a;
+    --accent: #3b82f6;
+    --accent2: #06b6d4;
+    --accent3: #8b5cf6;
+    --green: #10b981;
+    --red: #ef4444;
+    --yellow: #f59e0b;
+    --text: #e2e8f0;
+    --muted: #64748b;
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Sora', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content:'';
+    position: fixed;
+    top: -50%; left: -50%;
+    width: 200%; height: 200%;
+    background: radial-gradient(ellipse at 20% 20%, rgba(59,130,246,0.08) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 80%, rgba(139,92,246,0.06) 0%, transparent 50%);
+    animation: bgPulse 12s ease-in-out infinite alternate;
+    pointer-events: none;
+    z-index: 0;
+  }
+  @keyframes bgPulse { from{transform:scale(1)} to{transform:scale(1.05) rotate(2deg)} }
+
+  header {
+    position: sticky; top:0; z-index:100;
+    background: rgba(10,15,30,0.95);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    padding: 16px 20px;
+    display: flex; align-items: center; gap:16px;
+    flex-wrap: wrap;
+  }
+  .logo { font-size:1.3rem; font-weight:800; }
+  .logo span { color: var(--accent); }
+
+  nav { display:flex; gap:8px; flex-wrap:wrap; flex:1; }
+  .tab-btn {
+    padding: 8px 16px; border-radius:8px; font-size:0.8rem; font-weight:600;
+    border: 1px solid var(--border); background: var(--surface);
+    color: var(--muted); cursor:pointer; transition: all 0.2s;
+  }
+  .tab-btn:hover { border-color: var(--accent); color:var(--text); }
+  .tab-btn.active { background: var(--accent); border-color:var(--accent); color:#fff; }
+
+  main { position:relative; z-index:1; max-width:1400px; margin:0 auto; padding:24px 16px; }
+
+  .section { display:none; }
+  .section.active { display:block; animation: fadeIn 0.3s ease; }
+  @keyframes fadeIn { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
+
+  .chapter-grid { display:grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap:16px; margin-bottom:24px; }
+
+  .chapter-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius:16px; padding:20px;
+    cursor:pointer; transition: all 0.25s;
+    position: relative; overflow: hidden;
+  }
+  .chapter-card::before {
+    content:''; position:absolute; top:0; left:0; right:0; height:4px;
+    background: var(--card-color, var(--accent));
+  }
+  .chapter-card:hover { transform:translateY(-4px); border-color: var(--accent); }
+  .chapter-card.selected { border-color:var(--accent); background:var(--surface2); }
+  .chapter-card .icon { font-size:2rem; margin-bottom:10px; }
+  .chapter-card h3 { font-size:0.95rem; font-weight:700; margin-bottom:8px; }
+  .chapter-card p { font-size:0.78rem; color:var(--muted); line-height:1.5; }
+  .chapter-card .badge { position:absolute; top:14px; right:14px; background: rgba(59,130,246,0.15); color:var(--accent); font-size:0.7rem; padding:4px 10px; border-radius:20px; font-weight:600; }
+
+  .content-panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius:16px; padding:28px;
+    line-height:1.8;
+    margin-bottom: 24px;
+    max-height: 70vh;
+    overflow-y: auto;
+  }
+  .content-panel h2 { font-size:1.5rem; font-weight:800; margin-bottom:20px; color:var(--accent2); }
+  .content-panel h3 { font-size:1.1rem; font-weight:700; margin: 28px 0 12px; color:var(--accent); }
+  .content-panel h4 { font-size:0.95rem; font-weight:600; margin: 16px 0 8px; color:var(--accent3); }
+  .content-panel p { margin-bottom:12px; font-size:0.88rem; color:#cbd5e1; }
+  .content-panel ul { padding-left:24px; margin-bottom:12px; }
+  .content-panel li { font-size:0.88rem; margin-bottom:6px; color:#cbd5e1; }
+
+  .code-block {
+    background:#0d1117; border:1px solid #30363d;
+    border-radius:10px; padding:14px;
+    font-family:'JetBrains Mono', monospace;
+    font-size:0.75rem; line-height:1.5;
+    overflow-x:auto; margin:12px 0;
+    color:#c9d1d9;
+  }
+  .code-block .kw { color:#ff79c6; }
+  .code-block .str { color:#f1fa8c; }
+  .code-block .cm { color:#6272a4; font-style:italic; }
+  .code-block .fn { color:#50fa7b; }
+
+  .flashcard-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:16px; }
+  .flashcard { perspective:1000px; cursor:pointer; height:200px; }
+  .fc-inner {
+    position:relative; width:100%; height:100%;
+    transition: transform 0.55s;
+    transform-style:preserve-3d;
+  }
+  .flashcard.flipped .fc-inner { transform: rotateY(180deg); }
+  .fc-front, .fc-back {
+    position:absolute; width:100%; height:100%;
+    backface-visibility:hidden; border-radius:14px; padding:20px;
+    display:flex; align-items:center; justify-content:center;
+    text-align:center; font-size:0.85rem; line-height:1.5;
+    border: 1px solid var(--border);
+  }
+  .fc-front {
+    background: var(--surface2);
+    color: var(--text); font-weight:600;
+  }
+  .fc-back {
+    background: linear-gradient(135deg, rgba(59,130,246,0.15), rgba(139,92,246,0.15));
+    border:1px solid var(--accent);
+    transform: rotateY(180deg);
+    color:#e2e8f0; font-size:0.8rem;
+    font-family:'JetBrains Mono',monospace;
+  }
+
+  .quiz-container { max-width:780px; margin:0 auto; }
+  .quiz-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap; gap:10px; }
+  .quiz-score { font-size:0.9rem; font-weight:700; color:var(--green); }
+  .quiz-chapter-select {
+    background:var(--surface2); border:1px solid var(--border);
+    color:var(--text); padding:10px 16px; border-radius:8px;
+    font-size:0.85rem; cursor:pointer;
+  }
+
+  .question-card {
+    background: var(--surface);
+    border:1px solid var(--border);
+    border-radius:16px; padding:24px;
+    margin-bottom:16px;
+  }
+  .question-num { font-size:0.75rem; color:var(--muted); font-weight:600; letter-spacing:1px; margin-bottom:10px; }
+  .question-text { font-size:0.95rem; font-weight:600; line-height:1.6; margin-bottom:18px; }
+
+  .options { display:flex; flex-direction:column; gap:10px; }
+  .option-btn {
+    background:var(--surface2); border:1px solid var(--border);
+    border-radius:10px; padding:12px 16px;
+    text-align:left; font-size:0.85rem; color:var(--text); cursor:pointer;
+    transition:all 0.2s; display:flex; align-items:center; gap:10px;
+  }
+  .option-btn:hover:not(:disabled) { border-color:var(--accent); background:rgba(59,130,246,0.1); }
+  .option-btn.correct { border-color:var(--green); background:rgba(16,185,129,0.15); color:var(--green); }
+  .option-btn.wrong { border-color:var(--red); background:rgba(239,68,68,0.15); color:var(--red); }
+  .option-btn:disabled { cursor:default; }
+  .option-letter {
+    width:28px; height:28px; border-radius:50%;
+    background:rgba(255,255,255,0.08); display:flex;
+    align-items:center; justify-content:center;
+    font-size:0.75rem; font-weight:700; flex-shrink:0;
+  }
+
+  .explanation {
+    margin-top:14px; padding:12px 16px;
+    background:rgba(59,130,246,0.08); border-left:3px solid var(--accent);
+    border-radius:0 8px 8px 0; font-size:0.82rem; color:#94a3b8;
+    display:none;
+  }
+  .explanation.show { display:block; }
+
+  .btn {
+    padding:10px 24px; border-radius:10px; font-weight:700;
+    font-size:0.85rem;
+    cursor:pointer; transition:all 0.2s; border:none;
+  }
+  .btn-primary { background:var(--accent); color:#fff; }
+  .btn-primary:hover { background:#2563eb; }
+  .btn-secondary { background:var(--surface2); color:var(--text); border:1px solid var(--border); }
+  .btn-secondary:hover { border-color:var(--accent); }
+
+  .stats-bar {
+    display:flex; gap:16px; flex-wrap:wrap; margin-bottom:24px;
+  }
+  .stat-pill {
+    background:var(--surface); border:1px solid var(--border);
+    border-radius:10px; padding:10px 16px;
+    display:flex; align-items:center; gap:8px;
+    font-size:0.82rem;
+  }
+  .stat-pill .num { font-size:1.2rem; font-weight:800; color:var(--accent); }
+
+  .section-title {
+    font-size:1.8rem; font-weight:800; margin-bottom:8px;
+    background:linear-gradient(135deg,var(--accent),var(--accent2));
+    -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+  }
+  .section-sub { font-size:0.85rem; color:var(--muted); margin-bottom:24px; }
+
+  .tabs-small { display:flex; gap:8px; margin-bottom:16px; flex-wrap:wrap; }
+  .tab-small {
+    padding:8px 16px; border-radius:8px;
+    background:var(--surface); border:1px solid var(--border);
+    color:var(--muted); cursor:pointer; font-weight:600;
+    font-size:0.8rem; transition:all 0.2s;
+  }
+  .tab-small.active { background:var(--accent3); border-color:var(--accent3); color:#fff; }
+
+  @media(max-width:600px) {
+    .chapter-grid { grid-template-columns:1fr; }
+    .flashcard-grid { grid-template-columns:1fr; }
+    main { padding:16px 12px; }
+  }
+
+  ::-webkit-scrollbar { width:6px; }
+  ::-webkit-scrollbar-track { background:var(--bg); }
+  ::-webkit-scrollbar-thumb { background:var(--border); border-radius:3px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">📱 <span>Android</span> Dev</div>
+  <nav id="mainNav">
+    <button class="tab-btn active" onclick="showSection('courses')">📚 Courses</button>
+    <button class="tab-btn" onclick="showSection('flashcards')">🃏 Flashcards</button>
+    <button class="tab-btn" onclick="showSection('quiz')">🎯 Quiz</button>
+  </nav>
+</header>
+
+<main>
+
+<!-- COURSES SECTION -->
+<section class="section active" id="courses">
+  <div class="section-title">📚 Course Content</div>
+  <div class="section-sub">Complete lessons with code examples for all 8 chapters</div>
+  
+  <div class="tabs-small" id="courseTabs"></div>
+  
+  <div class="chapter-grid" id="chapterGrid"></div>
+  <div class="content-panel" id="contentPanel" style="display:none;"></div>
+</section>
+
+<!-- FLASHCARDS SECTION -->
+<section class="section" id="flashcards">
+  <div class="section-title">🃏 Flashcards</div>
+  <div class="section-sub">Interactive flashcards for each chapter. Click to flip!</div>
+  
+  <div style="margin-bottom:16px;">
+    <select id="fcChapterFilter" class="quiz-chapter-select" onchange="renderFlashcards()">
+      <option value="all">All Chapters</option>
+    </select>
+    <span id="fcCount" style="margin-left:16px; font-size:0.82rem; color:var(--muted);"></span>
+  </div>
+  <div class="flashcard-grid" id="flashcardGrid"></div>
+</section>
+
+<!-- QUIZ SECTION -->
+<section class="section" id="quiz">
+  <div class="section-title">🎯 Practice Quiz</div>
+  <div class="section-sub">20+ questions per chapter with instant feedback</div>
+  
+  <div class="quiz-header">
+    <select id="quizChapterSelect" class="quiz-chapter-select" onchange="startQuiz()">
+      <option value="all">All Chapters</option>
+    </select>
+    <div class="quiz-score" id="quizScoreDisplay">Score: 0 / 0</div>
+  </div>
+  
+  <div class="stats-bar" id="quizStatsBar"></div>
+  <div class="quiz-container" id="quizContainer"></div>
+  
+  <div style="text-align:center; margin-top:20px;">
+    <button class="btn btn-secondary" onclick="startQuiz()">🔄 Restart Quiz</button>
+  </div>
+</section>
+
+</main>
+
+<script>
+/* ============================================================
+   DATA: CHAPTERS WITH DETAILED CONTENT + FLASHCARDS + QUIZZES
+============================================================ */
+
+const CHAPTERS = [
+
+// ===================== CHAPTER 1 =====================
+{
+  id: 1,
+  title: "Ch.1 – Mobile Dev Approaches",
+  icon: "🌐",
+  color: "#3b82f6",
+  
+  content: `
+<h2>📱 Introduction to Mobile Development</h2>
+
+<h3>Mobile Operating Systems</h3>
+<p>A mobile operating system is designed to run on mobile devices. It manages:</p>
+<ul>
+  <li><strong>Wireless connectivity</strong> (WiFi, 3G/4G/5G, Bluetooth)</li>
+  <li><strong>User interfaces</strong> adapted for touch screens</li>
+  <li><strong>Internet & communication</strong> (browsing, phone calls, SMS)</li>
+  <li><strong>Memory management</strong> and <strong>process management</strong></li>
+</ul>
+
+<h4>Popular Mobile Operating Systems:</h4>
+<ul>
+  <li><strong>iOS</strong> (Apple) – Closed ecosystem, App Store</li>
+  <li><strong>Android</strong> (Google) – Open source, Google Play</li>
+  <li><strong>Windows Mobile</strong> (Microsoft) – Discontinued</li>
+  <li><strong>HarmonyOS</strong> (Huawei) – Emerging platform</li>
+</ul>
+
+<h3>Mobile Application Definition</h3>
+<p>A mobile application is a program designed for smartphones, tablets, or PDAs. It must be:</p>
+<ul>
+  <li><strong>Adapted</strong> to different device sizes and OS</li>
+  <li><strong>Ergonomic</strong> for touch-based interaction</li>
+  <li><strong>Efficient</strong> with limited power and bandwidth</li>
+  <li><strong>Distributed</strong> via app stores (App Store, Google Play, etc.)</li>
+</ul>
+
+<h3>Development Constraints</h3>
+<h4>Device Characteristics:</h4>
+<ul>
+  <li>💪 <strong>Power consumption</strong> – Limited battery life</li>
+  <li>⚙️ <strong>Computing capacity</strong> – Less RAM/CPU than desktops</li>
+  <li>🌐 <strong>Connectivity</strong> – Intermittent, varying speeds</li>
+  <li>📦 <strong>Storage</strong> – Limited internal storage</li>
+  <li>🔀 <strong>OS heterogeneity</strong> – Multiple OS and versions</li>
+</ul>
+
+<h4>Time to Market (TTM):</h4>
+<p>TTM = time between product design and market release. Critical for mobile apps where products become obsolete quickly.</p>
+
+<h3>🔄 Development Approaches Comparison</h3>
+
+<h3>1. Generic (Web) Development</h3>
+<p><strong>Definition:</strong> HTML/CSS/JavaScript websites accessed via mobile browser</p>
+
+<h4>Advantages:</h4>
+<ul>
+  <li>Simplest approach – just HTML/CSS</li>
+  <li>No download required – access from any device</li>
+  <li>Universal reach – all devices with browser</li>
+</ul>
+
+<h4>Disadvantages:</h4>
+<ul>
+  <li>Poor performance – slow loading</li>
+  <li>No native features – no GPS, camera, contacts access</li>
+  <li>Internet required – cannot work offline</li>
+  <li>Inconsistent UX – different behavior per browser</li>
+</ul>
+
+<h4>Sub-types:</h4>
+<ul>
+  <li><strong>Dedicated Site:</strong> Separate URLs per device type (m.example.com for mobile)</li>
+  <li><strong>Responsive Web Design:</strong> Single site that adapts to any screen size using HTML/CSS media queries</li>
+</ul>
+
+<div class="code-block">
+&lt;!-- Responsive Web Design Example --&gt;<br/>
+&lt;meta name="viewport" content="width=device-width"&gt;<br/>
+&lt;style&gt;<br/>
+  @media (max-width: 768px) {<br/>
+    .container { width: 100%; }<br/>
+  }<br/>
+&lt;/style&gt;
+</div>
+
+<h3>2. Native Development</h3>
+<p><strong>Definition:</strong> Apps built with platform-specific language and tools</p>
+
+<h4>Languages:</h4>
+<ul>
+  <li>Android: <strong>Java</strong> or <strong>Kotlin</strong></li>
+  <li>iOS: <strong>Swift</strong> or <strong>Objective-C</strong></li>
+</ul>
+
+<h4>Advantages:</h4>
+<ul>
+  <li>✅ <strong>High performance</strong> – Optimized for platform</li>
+  <li>✅ <strong>Full hardware access</strong> – GPS, camera, accelerometer, contacts, calendar</li>
+  <li>✅ <strong>Native look & feel</strong> – Matches OS design patterns</li>
+  <li>✅ <strong>Offline capable</strong> – Works without internet</li>
+</ul>
+
+<h4>Disadvantages:</h4>
+<ul>
+  <li>❌ <strong>High cost</strong> – Separate version per OS</li>
+  <li>❌ <strong>More maintenance</strong> – Updates × number of platforms</li>
+  <li>❌ <strong>Requires specialists</strong> – Need Java, Swift, Kotlin experts</li>
+</ul>
+
+<div class="code-block">
+<span class="cm">// Native Android Example (Java)</span><br/>
+<span class="kw">public class</span> MainActivity <span class="kw">extends</span> AppCompatActivity {<br/>
+&nbsp;&nbsp;<span class="kw">protected void</span> onCreate(Bundle savedInstanceState) {<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">super</span>.onCreate(savedInstanceState);<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;setContentView(R.layout.activity_main);<br/>
+&nbsp;&nbsp;}<br/>
+}
+</div>
+
+<h3>3. Cross-Platform / Hybrid Development</h3>
+<p><strong>Definition:</strong> Single codebase generates apps for multiple OS</p>
+
+<h4>Two Sub-types:</h4>
+
+<h4>A) Hybrid Web-Oriented (~80% web + ~20% native)</h4>
+<ul>
+  <li><strong>Technologies:</strong> HTML5, CSS3, JavaScript + native bridge</li>
+  <li><strong>Frameworks:</strong> Apache Cordova, PhoneGap, Titanium</li>
+  <li><strong>Advantage:</strong> Reduce cost, shared codebase</li>
+  <li><strong>Disadvantage:</strong> Limited performance, limited native features</li>
+</ul>
+
+<div class="code-block">
+<span class="cm">// Hybrid App with Cordova/PhoneGap</span><br/>
+&lt;!DOCTYPE html&gt;<br/>
+&lt;script src="cordova.js"&gt;&lt;/script&gt;<br/>
+&lt;script&gt;<br/>
+&nbsp;&nbsp;navigator.geolocation.getCurrentPosition(<span class="fn">success</span>);<br/>
+&lt;/script&gt;
+</div>
+
+<h4>B) Generated Native (Compile single source → native code per OS)</h4>
+<ul>
+  <li><strong>Frameworks:</strong> Xamarin (C#), Appcelerator (JS), Adobe Air (AS3)</li>
+  <li><strong>Advantage:</strong> Better performance than web-based hybrid</li>
+  <li><strong>Disadvantage:</strong> Still requires platform-specific knowledge</li>
+</ul>
+
+<h3>Comparison Summary</h3>
+<table style="width:100%; border-collapse: collapse; margin: 16px 0;">
+  <tr style="background: rgba(59,130,246,0.1);">
+    <th style="border: 1px solid var(--border); padding: 8px;">Approach</th>
+    <th style="border: 1px solid var(--border); padding: 8px;">Cost</th>
+    <th style="border: 1px solid var(--border); padding: 8px;">Performance</th>
+    <th style="border: 1px solid var(--border); padding: 8px;">Features</th>
+  </tr>
+  <tr>
+    <td style="border: 1px solid var(--border); padding: 8px;">Web</td>
+    <td style="border: 1px solid var(--border); padding: 8px;">Low</td>
+    <td style="border: 1px solid var(--border); padding: 8px;">Poor</td>
+    <td style="border: 1px solid var(--border); padding: 8px;">Limited</td>
+  </tr>
+  <tr>
+    <td style="border: 1px solid var(--border); padding: 8px;">Native</td>
+    <td style="border: 1px solid var(--border); padding: 8px;">High</td>
+    <td style="border: 1px solid var(--border); padding: 8px;">Excellent</td>
+    <td style="border: 1px solid var(--border); padding: 8px;">Full</td>
+  </tr>
+  <tr>
+    <td style="border: 1px solid var(--border); padding: 8px;">Hybrid</td>
+    <td style="border: 1px solid var(--border); padding: 8px;">Medium</td>
+    <td style="border: 1px solid var(--border); padding: 8px;">Moderate</td>
+    <td style="border: 1px solid var(--border); padding: 8px;">Partial</td>
+  </tr>
+</table>
+  `,
+
+  flashcards: [
+    { front: "What is TTM (Time to Market)?", back: "The time between product design and market release. Critical to minimize for mobile apps." },
+    { front: "Name 4 mobile operating systems", back: "iOS (Apple), Android (Google), Windows Mobile, HarmonyOS (Huawei)" },
+    { front: "Hybrid apps: ~% web + ~% native?", back: "~80% web (HTML/CSS/JS) + ~20% native OS features" },
+    { front: "Main disadvantage of native development?", back: "Separate implementation per OS = high development, testing, and maintenance costs" },
+    { front: "What is Responsive Web Design?", back: "Web design approach using HTML/CSS media queries to adapt transparently to all device screen sizes" },
+    { front: "Frameworks for hybrid development?", back: "Apache Cordova, PhoneGap, Titanium (web-oriented hybrid)" },
+    { front: "Xamarin uses which language?", back: "C# — for generated native cross-platform development" },
+    { front: "Web apps main disadvantage?", back: "No native features access, requires internet, poor performance, inconsistent UX" },
+    { front: "Native apps full hardware access includes?", back: "GPS, camera, accelerometer, gyroscope, compass, contacts, calendar, sensors" },
+    { front: "When to choose native development?", back: "When maximum performance, full hardware access, and native UX are required" },
+    { front: "Main advantage of cross-platform?", back: "Single codebase for multiple OS = reduce development time, cost, and maintenance" },
+    { front: "Adobe Air uses which language?", back: "AS3 (ActionScript 3) for generated native applications" },
+  ],
+
+  quiz: [
+    { q: "TTM (Time to Market) is most important in which type of industry?", options: ["Stable markets", "Fast-moving where products obsolete quickly", "Government sector", "Academic research"], answer: 1, explanation: "TTM is critical in mobile/tech where products become obsolete quickly." },
+    { q: "A native Android app can run on iPhone without modification:", options: ["True", "False", "Only with emulator", "With API Bridge"], answer: 1, explanation: "Native apps are OS-specific. Android apps need rewriting for iOS." },
+    { q: "Hybrid apps composed of approximately:", options: ["50% web + 50% native", "80% web + 20% native", "100% native", "100% web"], answer: 1, explanation: "Hybrid = ~80% HTML/CSS/JavaScript + ~20% native OS capabilities" },
+    { q: "Apache Cordova is used for:", options: ["Native Android only", "Generated native development", "Hybrid web-oriented development", "iOS development"], answer: 2, explanation: "Cordova bridges HTML/CSS/JS with native mobile APIs" },
+    { q: "The biggest advantage of cross-platform is:", options: ["Best performance always", "Single codebase → multiple OS", "Unlimited features", "No internet needed"], answer: 1, explanation: "Cross-platform reduces cost and time by using one codebase" },
+    { q: "Which approach has the highest performance?", options: ["Web apps", "Hybrid apps", "Native apps", "All equal"], answer: 2, explanation: "Native apps are optimized for the platform = highest performance" },
+    { q: "Disadvantage of generic web development:", options: ["Free to download", "Long loading times, no native features, requires internet", "Too fast", "Stores data locally"], answer: 1, explanation: "Web apps slow, need connectivity, no device hardware access" },
+    { q: "HarmonyOS is developed by:", options: ["Google", "Apple", "Huawei", "Samsung"], answer: 2, explanation: "HarmonyOS is Huawei's mobile operating system" },
+    { q: "For an app requiring camera and GPS, best approach is:", options: ["Web development", "Hybrid development", "Native development", "Any approach works"], answer: 2, explanation: "Native gives full hardware access; web/hybrid are limited" },
+    { q: "Xamarin and Appcelerator are examples of:", options: ["Hybrid frameworks", "Responsive design", "Generated Native frameworks", "Web frameworks"], answer: 2, explanation: "Both compile single source → native code for different platforms" },
+  ]
+},
+
+// ===================== CHAPTER 2 =====================
+{
+  id: 2,
+  title: "Ch.2 – Android Platform & SDK",
+  icon: "🤖",
+  color: "#06b6d4",
+  
+  content: `
+<h2>🤖 Android Platform Architecture</h2>
+
+<h3>Layered Architecture</h3>
+<p>Android uses a 6-layer architecture from top to bottom:</p>
+
+<h3>Layer 1: Application Layer</h3>
+<p><strong>Accessible to users.</strong> Contains pre-installed Java applications:</p>
+<ul>
+  <li>Home screen, Calendar, Email client</li>
+  <li>Browser, Camera, Gallery, Maps</li>
+  <li>SMS/Phone, Settings, Clock</li>
+</ul>
+
+<h3>Layer 2: Application Framework</h3>
+<p><strong>Reusable components.</strong> Services for app development:</p>
+<ul>
+  <li><strong>Activity Manager:</strong> Manages activity lifecycle and stack</li>
+  <li><strong>Content Provider:</strong> Share data between apps</li>
+  <li><strong>Window Manager:</strong> Manages windows and UI</li>
+  <li><strong>Resource Manager:</strong> Access layouts, strings, images</li>
+  <li><strong>Notification Manager:</strong> Display system notifications</li>
+</ul>
+
+<h3>Layer 3: Libraries (C/C++)</h3>
+<p>Native libraries accessible through the framework:</p>
+<ul>
+  <li><strong>libc:</strong> Standard C library optimized for embedded systems</li>
+  <li><strong>Multimedia:</strong> Support MPEG4, MP3, JPG, PNG, WebM, WebP</li>
+  <li><strong>FreeType:</strong> Font rendering engine for vector fonts</li>
+  <li><strong>SQLite:</strong> Embedded relational database</li>
+  <li><strong>OpenGL ES:</strong> 3D graphics rendering</li>
+</ul>
+
+<h3>Layer 4: Runtime Engine (Virtual Machines)</h3>
+
+<h4>Dalvik VM (Legacy)</h4>
+<p><strong>Adapted for limited memory and processing power.</strong> Each app runs in its own Dalvik instance.</p>
+
+<div class="code-block">
+<span class="cm">// Build Pipeline with Dalvik</span><br/>
+Source Code (.java)<br/>
+  ↓ Java Compiler<br/>
+Bytecode (.class)<br/>
+  ↓ Dex Compiler (dx)<br/>
+Dalvik Executable (.dex)<br/>
+  ↓ Dexopt Tool<br/>
+Optimized Dex (.odex)<br/>
+  ↓ JIT Compiler (at runtime)<br/>
+Dalvik VM Execution
+</div>
+
+<h4>JIT (Just-In-Time) Compilation (Android 2.2+):</h4>
+<ul>
+  <li>Interprets bytecode line-by-line initially</li>
+  <li>When function identified as "hotspot", JIT compiles to native code</li>
+  <li>Dexopt tool creates .odex files with optimized opcodes</li>
+  <li>Overhead initially, then fast native execution</li>
+</ul>
+
+<h4>ART (Android Runtime) - Modern Approach</h4>
+<p><strong>Introduced Android 4.4, replaced Dalvik from 5.0.</strong></p>
+
+<div class="code-block">
+<span class="cm">// Build Pipeline with ART</span><br/>
+Source Code (.java)<br/>
+  ↓ Java Compiler<br/>
+Bytecode (.class)<br/>
+  ↓ Dex Compiler (dx)<br/>
+Dalvik Executable (.dex)<br/>
+  ↓ dex2oat Tool (at install time)<br/>
+Native ELF Code (.oat)<br/>
+  ↓ AOT Compilation<br/>
+ART Runtime Execution
+</div>
+
+<h4>AOT (Ahead-Of-Time) Compilation:</h4>
+<ul>
+  <li>Compiles at <strong>installation time</strong>, not runtime</li>
+  <li>dex2oat converts .dex → ELF (.oat) native code</li>
+  <li>Native code executed directly (no interpretation)</li>
+  <li><strong>Advantages:</strong> Faster startup, better battery life, better performance</li>
+  <li><strong>Disadvantages:</strong> Longer installation, more storage</li>
+</ul>
+
+<h4>Dalvik vs ART Comparison:</h4>
+<table style="width:100%; border-collapse: collapse; margin: 16px 0;">
+  <tr style="background: rgba(59,130,246,0.1);">
+    <th style="border: 1px solid var(--border); padding: 8px;">Aspect</th>
+    <th style="border: 1px solid var(--border); padding: 8px;">Dalvik</th>
+    <th style="border: 1px solid var(--border); padding: 8px;">ART</th>
+  </tr>
+  <tr>
+    <td style="border: 1px solid var(--border); padding: 8px;">Compilation</td>
+    <td style="border: 1px solid var(--border); padding: 8px;">JIT at runtime</td>
+    <td style="border: 1px solid var(--border); padding: 8px;">AOT at install</td>
+  </tr>
+  <tr>
+    <td style="border: 1px solid var(--border); padding: 8px;">Startup Time</td>
+    <td style="border: 1px solid var(--border); padding: 8px;">Slower</td>
+    <td style="border: 1px solid var(--border); padding: 8px;">Faster</td>
+  </tr>
+  <tr>
+    <td style="border: 1px solid var(--border); padding: 8px;">Install Time</td>
+    <td style="border: 1px solid var(--border); padding: 8px;">Fast</td>
+    <td style="border: 1px solid var(--border); padding: 8px;">Slower</td>
+  </tr>
+  <tr>
+    <td style="border: 1px solid var(--border); padding: 8px;">Battery Life</td>
+    <td style="border: 1px solid var(--border); padding: 8px;">Moderate</td>
+    <td style="border: 1px solid var(--border); padding: 8px;">Better</td>
+  </tr>
+  <tr>
+    <td style="border: 1px solid var(--border); padding: 8px;">Storage</td>
+    <td style="border: 1px solid var(--border); padding: 8px;">Less</td>
+    <td style="border: 1px solid var(--border); padding: 8px;">More</td>
+  </tr>
+</table>
+
+<h3>Layer 5: HAL (Hardware Abstraction Layer)</h3>
+<p><strong>Between libraries and Linux kernel.</strong> Abstracts hardware differences.</p>
+<ul>
+  <li>Provides interfaces implementing kernel drivers</li>
+  <li>Separates logical platform from hardware interfaces</li>
+  <li>Allows porting to different hardware without rewriting libraries</li>
+  <li>Developers don't write device-specific code manually</li>
+</ul>
+
+<h3>Layer 6: Linux Kernel (v2.6)</h3>
+<p><strong>Base layer.</strong> Manages system services:</p>
+<ul>
+  <li>Process and thread management</li>
+  <li>Memory management and virtual memory</li>
+  <li>Device drivers</li>
+  <li>Security (user/group/permission system)</li>
+  <li>Networking (TCP/IP stack)</li>
+</ul>
+
+<h3>Android SDK (Software Development Kit)</h3>
+
+<h4>Purpose:</h4>
+<p>Provides complete environment to implement, test, and debug Android applications.</p>
+
+<h4>Key Components:</h4>
+
+<h4>1. SDK Manager</h4>
+<ul>
+  <li>Download and install Android platform versions</li>
+  <li>Install tools and emulators</li>
+  <li>Manage Google APIs</li>
+</ul>
+
+<h4>2. AVD Manager (Android Virtual Device)</h4>
+<p>Create and configure virtual devices for testing:</p>
+<ul>
+  <li>Device name and type</li>
+  <li>Android version (API Level)</li>
+  <li>SD card capacity</li>
+  <li>Screen resolution and density</li>
+  <li>RAM and storage</li>
+</ul>
+
+<div class="code-block">
+<span class="cm">// Example AVD Configuration</span><br/>
+Name: Pixel_6_API_33<br/>
+Android Version: 13 (API 33)<br/>
+SD Card: 512MB<br/>
+Screen: 1080 × 2400<br/>
+RAM: 2048MB<br/>
+Storage: 4GB
+</div>
+
+<h3>SDK Tools</h3>
+
+<h4>ADB (Android Debug Bridge)</h4>
+<p><strong>Client-server tool for device communication.</strong></p>
+
+<div class="code-block">
+<span class="cm">// ADB Commands</span><br/>
+adb devices  <span class="cm">// List connected devices</span><br/>
+adb push local/file /device/path  <span class="cm">// Upload file</span><br/>
+adb pull /device/file local/path  <span class="cm">// Download file</span><br/>
+adb install app.apk  <span class="cm">// Install app</span><br/>
+adb shell  <span class="cm">// Access device shell</span><br/>
+adb logcat  <span class="cm">// View system log</span>
+</div>
+
+<h4>dx (Dex Compiler)</h4>
+<p>Converts .class bytecode files to .dex Dalvik executable format.</p>
+
+<h4>DDMS (Dalvik Debug Monitor Service)</h4>
+<p>Debugging tool for:</p>
+<ul>
+  <li>Query active processes</li>
+  <li>Examine stack and heap</li>
+  <li>Monitor and pause threads</li>
+  <li>Explore device file system</li>
+</ul>
+
+<h4>aapt (Android Asset Packaging Tool)</h4>
+<p>Builds APK files:</p>
+<ul>
+  <li>Compiles resources (strings, layouts, drawables)</li>
+  <li>Compiles AndroidManifest.xml to binary</li>
+  <li>Packages into final .apk archive</li>
+</ul>
+
+<h3>Development Languages</h3>
+<ul>
+  <li><strong>Java:</strong> Original official language (still supported)</li>
+  <li><strong>Kotlin:</strong> Official 2nd language since 2017 (preferred by Google)</li>
+  <li><strong>Flutter:</strong> Google's 2017 SDK with Dart language (multiplatform)</li>
+  <li><strong>Dart:</strong> Language with JIT and AOT compilation</li>
+</ul>
+
+<h3>IDEs for Development</h3>
+<ul>
+  <li><strong>Android Studio:</strong> Official Google IDE (recommended)</li>
+  <li><strong>IntelliJ IDEA:</strong> Powerful IDE with Android plugin</li>
+  <li><strong>Eclipse:</strong> Legacy, no longer recommended</li>
+</ul>
+  `,
+
+  flashcards: [
+    { front: "What does ADB stand for?", back: "Android Debug Bridge — command-line client-server tool for device/emulator communication" },
+    { front: "Dalvik vs ART: when compile?", back: "Dalvik: JIT at runtime; ART: AOT at installation time" },
+    { front: "What is dex2oat?", back: "Tool that converts .dex bytecode to native ELF (.oat) code for ART at installation" },
+    { front: "What is an AVD?", back: "Android Virtual Device — configured virtual emulator with Android version, screen size, SD card, RAM" },
+    { front: "What does aapt stand for?", back: "Android Asset Packaging Tool — compiles resources and creates APK archives" },
+    { front: "What is API Level?", back: "Integer ID uniquely identifying Android SDK version (e.g., API 33 = Android 13)" },
+    { front: "What is HAL?", back: "Hardware Abstraction Layer — between libraries and kernel, abstracts hardware differences" },
+    { front: "Tool creates .dex from .class?", back: "dx — Dex compiler" },
+    { front: "What is DDMS?", back: "Dalvik Debug Monitor Service — inspect processes, stack, heap, threads, filesystem" },
+    { front: "What is Flutter?", back: "Google's 2017 open-source SDK for multiplatform (Android, iOS, web) using Dart" },
+    { front: "JIT compilation when occurs?", back: "Just-In-Time: during runtime while app is running (Dalvik)" },
+    { front: "AOT compilation when occurs?", back: "Ahead-Of-Time: during app installation before execution (ART)" },
+  ],
+
+  quiz: [
+    { q: "ART replaced Dalvik starting from:", options: ["Android 4.4 KitKat", "Android 5.0 Lollipop", "Android 2.2 Froyo", "Android 6.0 Marshmallow"], answer: 1, explanation: "ART became default in Android 5.0 (Lollipop), 2014" },
+    { q: "AOT stands for:", options: ["Android On-Time", "Ahead-Of-Time", "App Optimization Tool", "Active Output Threading"], answer: 1, explanation: "AOT = Ahead-Of-Time compilation at installation" },
+    { q: "ART advantage over Dalvik:", options: ["Faster install", "Faster runtime", "Less storage", "All wrong"], answer: 1, explanation: "ART: faster startup, better battery, direct native execution" },
+    { q: "ADB has how many components?", options: ["1", "2", "3", "4"], answer: 2, explanation: "ADB: daemon (device), server (manages), client (dev machine)" },
+    { q: "dx tool converts to:", options: [".java", ".apk", ".dex", ".oat"], answer: 2, explanation: "dx creates Dalvik executable .dex bytecode" },
+    { q: "HAL is between:", options: ["App and Framework", "Libraries and Linux Kernel", "Runtime and Apps", "Kernel and Hardware"], answer: 1, explanation: "HAL abstracts hardware for libraries" },
+    { q: "Dalvik JIT introduced in:", options: ["Android 1.0", "Android 2.2 Froyo", "Android 4.4", "Android 5.0"], answer: 1, explanation: "Froyo (2.2) added JIT for performance" },
+    { q: "Command to install APK:", options: ["adb push", "adb install app.apk", "adb forward", "adb pull"], answer: 1, explanation: "'adb install app.apk' installs on device" },
+    { q: "Flutter created by:", options: ["Apple", "Microsoft", "Google", "Facebook"], answer: 2, explanation: "Google's open-source multiplatform SDK" },
+    { q: "Kotlin official language since:", options: ["2015", "2017", "2019", "2021"], answer: 1, explanation: "Google announced Kotlin as 2nd supported language May 2017" },
+  ]
+},
+
+// ===================== CHAPTER 3 =====================
+{
+  id: 3,
+  title: "Ch.3 – App Components",
+  icon: "🧩",
+  color: "#8b5cf6",
+  
+  content: `
+<h2>🧩 Android Application Components</h2>
+
+<h3>Application Structure</h3>
+<p>Every Android app contains three main elements:</p>
+<ul>
+  <li><strong>Activities:</strong> Screens/UI with Views</li>
+  <li><strong>Resources:</strong> Layouts (XML), strings, images, colors, videos</li>
+  <li><strong>AndroidManifest.xml:</strong> App configuration and metadata</li>
+</ul>
+
+<h3>Activity</h3>
+<p><strong>The basic building block of Android UI.</strong> Each Activity represents one screen.</p>
+
+<h4>Key Points:</h4>
+<ul>
+  <li>Inherits from <strong>android.app.Activity</strong> class</li>
+  <li>Contains Java/Kotlin code and manages Views</li>
+  <li>Each Activity typically has one associated layout XML file</li>
+  <li>An app can have multiple activities (multi-screen)</li>
+  <li>Activities can exist without UI (background services)</li>
+</ul>
+
+<div class="code-block">
+<span class="kw">public class</span> MainActivity <span class="kw">extends</span> AppCompatActivity {<br/>
+&nbsp;&nbsp;<span class="kw">@Override</span><br/>
+&nbsp;&nbsp;<span class="kw">protected void</span> onCreate(Bundle savedInstanceState) {<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">super</span>.onCreate(savedInstanceState);<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;setContentView(R.layout.activity_main);<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="cm">// Get UI elements by ID</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Button myButton = findViewById(R.id.myButton);<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;myButton.setOnClickListener(v -> {<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Toast.makeText(this, <span class="str">"Button clicked!"</span>, Toast.LENGTH_SHORT).show();<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;});<br/>
+&nbsp;&nbsp;}<br/>
+}
+</div>
+
+<h3>Activity Lifecycle</h3>
+<p><strong>Activities are managed as a STACK.</strong></p>
+
+<h4>Stack Behavior:</h4>
+<ul>
+  <li>New activity launched → pushed on top (foreground)</li>
+  <li>Previous activity → pushed down (background, partially visible)</li>
+  <li>When activity finishes → popped from stack</li>
+</ul>
+
+<h4>Lifecycle States & Callbacks:</h4>
+
+<table style="width:100%; border-collapse: collapse; margin: 16px 0;">
+  <tr style="background: rgba(59,130,246,0.1);">
+    <th style="border: 1px solid var(--border); padding: 8px;">State</th>
+    <th style="border: 1px solid var(--border); padding: 8px;">Callback</th>
+    <th style="border: 1px solid var(--border); padding: 8px;">Description</th>
+  </tr>
+  <tr>
+    <td style="border: 1px solid var(--border); padding: 8px;">Created</td>
+    <td style="border: 1px solid var(--border); padding: 8px;">onCreate()</td>
+    <td style="border: 1px solid var(--border); padding: 8px;">Activity first created</td>
+  </tr>
+  <tr>
+    <td style="border: 1px solid var(--border); padding: 8px;">Started</td>
+    <td style="border: 1px solid var(--border); padding: 8px;">onStart()</td>
+    <td style="border: 1px solid var(--border); padding: 8px;">Activity becoming visible</td>
+  </tr>
+  <tr>
+    <td style="border: 1px solid var(--border); padding: 8px;">Resumed</td>
+    <td style="border: 1px solid var(--border); padding: 8px;">onResume()</td>
+    <td style="border: 1px solid var(--border); padding: 8px;">Activity in foreground, interactive</td>
+  </tr>
+  <tr>
+    <td style="border: 1px solid var(--border); padding: 8px;">Paused</td>
+    <td style="border: 1px solid var(--border); padding: 8px;">onPause()</td>
+    <td style="border: 1px solid var(--border); padding: 8px;">Another activity gaining focus</td>
+  </tr>
+  <tr>
+    <td style="border: 1px solid var(--border); padding: 8px;">Stopped</td>
+    <td style="border: 1px solid var(--border); padding: 8px;">onStop()</td>
+    <td style="border: 1px solid var(--border); padding: 8px;">Activity not visible</td>
+  </tr>
+  <tr>
+    <td style="border: 1px solid var(--border); padding: 8px;">Destroyed</td>
+    <td style="border: 1px solid var(--border); padding: 8px;">onDestroy()</td>
+    <td style="border: 1px solid var(--border); padding: 8px;">Activity being removed</td>
+  </tr>
+</table>
+
+<h4>Complete Lifecycle Order:</h4>
+<div class="code-block">
+onCreate() → onStart() → onResume() → [Running] 
+  ↓ (another activity comes to foreground)
+onPause() → onStop() → onDestroy()
+  ↓ (if user returns)
+onRestart() → onStart() → onResume()
+</div>
+
+<h3>Key Lifecycle Methods</h3>
+
+<h4>onCreate(Bundle savedInstanceState)</h4>
+<p>Called when activity first created. <strong>Required method to override.</strong></p>
+<ul>
+  <li>Initialize resources and UI</li>
+  <li>Load layout XML with setContentView()</li>
+  <li>Get references to UI elements with findViewById()</li>
+  <li>Register listeners</li>
+  <li>Bundle parameter: restore state data from previous instance</li>
+</ul>
+
+<div class="code-block">
+<span class="kw">@Override</span><br/>
+<span class="kw">protected void</span> onCreate(Bundle savedInstanceState) {<br/>
+&nbsp;&nbsp;<span class="kw">super</span>.onCreate(savedInstanceState);<br/>
+&nbsp;&nbsp;setContentView(R.layout.activity_main);<br/>
+&nbsp;&nbsp;<br/>
+&nbsp;&nbsp;<span class="cm">// Restore state if needed</span><br/>
+&nbsp;&nbsp;<span class="kw">if</span> (savedInstanceState != <span class="kw">null</span>) {<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;String value = savedInstanceState.getString(<span class="str">"key"</span>);<br/>
+&nbsp;&nbsp;}<br/>
+}
+</div>
+
+<h4>onPause()</h4>
+<p>Called when activity loses focus (another activity comes to foreground).</p>
+<ul>
+  <li>Activity is partially visible but not interactive</li>
+  <li>Save data that should persist</li>
+  <li>Stop animations or background work</li>
+  <li>Release resources (database connections, camera, GPS)</li>
+</ul>
+
+<div class="code-block">
+<span class="kw">@Override</span><br/>
+<span class="kw">protected void</span> onPause() {<br/>
+&nbsp;&nbsp;<span class="kw">super</span>.onPause();<br/>
+&nbsp;&nbsp;<span class="cm">// Save data to SharedPreferences</span><br/>
+&nbsp;&nbsp;SharedPreferences prefs = getSharedPreferences(<span class="str">"myPrefs"</span>, MODE_PRIVATE);<br/>
+&nbsp;&nbsp;prefs.edit().putString(<span class="str">"saved_text"</span>, editText.getText().toString()).apply();<br/>
+&nbsp;&nbsp;<br/>
+&nbsp;&nbsp;<span class="cm">// Stop tracking location</span><br/>
+&nbsp;&nbsp;locationManager.removeUpdates(locationListener);<br/>
+}
+</div>
+
+<h4>onResume()</h4>
+<p>Called when activity regains focus (comes to foreground).</p>
+<ul>
+  <li>Activity is now interactive</li>
+  <li>Resume animations or background work</li>
+  <li>Acquire resources (camera, GPS, sensors)</li>
+</ul>
+
+<h4>onDestroy()</h4>
+<p>Called when activity is permanently destroyed.</p>
+<ul>
+  <li>Final cleanup of resources</li>
+  <li>Unregister listeners</li>
+  <li>System may kill process (not guaranteed)</li>
+</ul>
+
+<h3>AndroidManifest.xml</h3>
+<p><strong>The app's configuration file.</strong> Describes all components and permissions.</p>
+
+<div class="code-block">
+<span class="kw">&lt;?xml</span> version=<span class="str">"1.0"</span> encoding=<span class="str">"utf-8"</span><span class="kw">?&gt;</span><br/>
+<span class="kw">&lt;manifest</span> <span class="fn">xmlns:android</span>=<span class="str">"http://schemas.android.com/apk/res/android"</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="fn">package</span>=<span class="str">"com.example.myapp"</span><span class="kw">&gt;</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="cm">&lt;!-- Permissions --&gt;</span><br/>
+&nbsp;&nbsp;<span class="kw">&lt;uses-permission</span> <span class="fn">android:name</span>=<span class="str">"android.permission.INTERNET"</span> <span class="kw">/&gt;</span><br/>
+&nbsp;&nbsp;<span class="kw">&lt;uses-permission</span> <span class="fn">android:name</span>=<span class="str">"android.permission.ACCESS_FINE_LOCATION"</span> <span class="kw">/&gt;</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="cm">&lt;!-- Minimum SDK --&gt;</span><br/>
+&nbsp;&nbsp;<span class="kw">&lt;uses-sdk</span> <span class="fn">android:minSdkVersion</span>=<span class="str">"24"</span> <span class="kw">/&gt;</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="kw">&lt;application</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="fn">android:label</span>=<span class="str">"@string/app_name"</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="fn">android:icon</span>=<span class="str">"@drawable/ic_launcher"</span><span class="kw">&gt;</span><br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="cm">&lt;!-- Activities --&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">&lt;activity</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="fn">android:name</span>=<span class="str">".MainActivity"</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="fn">android:label</span>=<span class="str">"@string/app_name"</span><span class="kw">&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="cm">&lt;!-- Intent Filter: Makes this launcher activity --&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">&lt;intent-filter&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">&lt;action</span> <span class="fn">android:name</span>=<span class="str">"android.intent.action.MAIN"</span> <span class="kw">/&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">&lt;category</span> <span class="fn">android:name</span>=<span class="str">"android.intent.category.LAUNCHER"</span> <span class="kw">/&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">&lt;/intent-filter&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">&lt;/activity&gt;</span><br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="cm">&lt;!-- Second Activity --&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">&lt;activity</span> <span class="fn">android:name</span>=<span class="str">".SecondActivity"</span> <span class="kw">/&gt;</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="kw">&lt;/application&gt;</span><br/>
+<span class="kw">&lt;/manifest&gt;</span>
+</div>
+
+<h4>Required Manifest Elements:</h4>
+<ul>
+  <li><strong>&lt;manifest&gt;:</strong> Root element, contains package name</li>
+  <li><strong>&lt;uses-sdk&gt;:</strong> Min/target Android version</li>
+  <li><strong>&lt;uses-permission&gt;:</strong> Requested app permissions</li>
+  <li><strong>&lt;application&gt;:</strong> Contains all components</li>
+  <li><strong>&lt;activity&gt;:</strong> Declares each activity with name, label, icon</li>
+  <li><strong>&lt;intent-filter&gt;:</strong> Types of intents activity handles</li>
+</ul>
+
+<h3>Intent</h3>
+<p><strong>An abstract description of an operation to perform.</strong> Mediates communication between components.</p>
+
+<h4>Common Uses:</h4>
+<ul>
+  <li>Launch an activity</li>
+  <li>Request services from other apps</li>
+  <li>Send data between activities</li>
+  <li>Broadcast events system-wide</li>
+</ul>
+
+<h4>Intent Types:</h4>
+<ul>
+  <li><strong>Explicit Intent:</strong> Specifies exact target activity class</li>
+  <li><strong>Implicit Intent:</strong> System finds best matching activity</li>
+</ul>
+
+<div class="code-block">
+<span class="cm">// Explicit Intent: Target specific activity</span><br/>
+Intent intent = <span class="kw">new</span> Intent(MainActivity.<span class="kw">this</span>, SecondActivity.<span class="kw">class</span>);<br/>
+intent.putExtra(<span class="str">"username"</span>, <span class="str">"Ali"</span>);<br/>
+startActivity(intent);<br/>
+<br/>
+<span class="cm">// Implicit Intent: System finds best app</span><br/>
+Uri uri = Uri.parse(<span class="str">"https://www.google.com"</span>);<br/>
+Intent browserIntent = <span class="kw">new</span> Intent(Intent.ACTION_VIEW, uri);<br/>
+startActivity(browserIntent);
+</div>
+
+<h3>Permissions</h3>
+<p><strong>Apps must declare required permissions in manifest.</strong></p>
+
+<div class="code-block">
+<span class="cm">// Common Permissions</span><br/>
+<span class="kw">&lt;uses-permission</span> <span class="fn">android:name</span>=<span class="str">"android.permission.INTERNET"</span> <span class="kw">/&gt;</span><br/>
+<span class="kw">&lt;uses-permission</span> <span class="fn">android:name</span>=<span class="str">"android.permission.ACCESS_FINE_LOCATION"</span> <span class="kw">/&gt;</span><br/>
+<span class="kw">&lt;uses-permission</span> <span class="fn">android:name</span>=<span class="str">"android.permission.CAMERA"</span> <span class="kw">/&gt;</span><br/>
+<span class="kw">&lt;uses-permission</span> <span class="fn">android:name</span>=<span class="str">"android.permission.READ_CONTACTS"</span> <span class="kw">/&gt;</span><br/>
+<span class="kw">&lt;uses-permission</span> <span class="fn">android:name</span>=<span class="str">"android.permission.VIBRATE"</span> <span class="kw">/&gt;</span>
+</div>
+  `,
+
+  flashcards: [
+    { front: "Activity lifecycle order?", back: "onCreate → onStart → onResume → [Running] → onPause → onStop → onDestroy (+ onRestart)" },
+    { front: "What does setContentView() do?", back: "Loads UI layout from XML file: setContentView(R.layout.activity_main)" },
+    { front: "What does findViewById() return?", back: "View object by ID: Button btn = (Button) findViewById(R.id.myButton)" },
+    { front: "What is AndroidManifest.xml?", back: "App configuration with package, components, permissions, min SDK, libraries" },
+    { front: "onCreate(Bundle) purpose?", back: "Called on creation. Initialize UI, load layout, register listeners, restore state" },
+    { front: "What is the R class?", back: "Auto-generated by aapt containing integer IDs for all resources in res/" },
+    { front: "EditText hint attribute does?", back: "android:hint=\"text\" — shows placeholder text that disappears on focus" },
+    { front: "onPause() indicates?", back: "Another activity coming to foreground; current activity partially visible" },
+    { front: "<intent-filter> tag for?", back: "Defines what types of intents the activity can handle (action, category, data)" },
+    { front: "Internet permission string?", back: "<uses-permission android:name=\"android.permission.INTERNET\" />" },
+    { front: "What does onResume() do?", back: "Activity regains focus, becomes interactive. Resume animations, acquire resources" },
+    { front: "Activities managed as?", back: "Stack (LIFO) — newest on top (foreground), others pushed down (background)" },
+  ],
+
+  quiz: [
+    { q: "onCreate() is the first callback called when:", options: ["Activity resumes", "Activity first created", "Back button pressed", "App closed"], answer: 1, explanation: "onCreate(Bundle) is called when activity is created" },
+    { q: "setContentView(R.layout.main) does:", options: ["Creates new activity", "Loads UI from XML layout", "Finds a view by ID", "Destroys activity"], answer: 1, explanation: "setContentView() inflates and displays the specified XML layout" },
+    { q: "findViewById(R.id.text) returns:", options: ["String value", "View object by ID", "Activity ID", "Package name"], answer: 1, explanation: "findViewById() retrieves a View by its resource ID" },
+    { q: "After onCreate(), next lifecycle:", options: ["onPause", "onStart", "onStop", "onDestroy"], answer: 1, explanation: "Order: onCreate → onStart → onResume" },
+    { q: "Activities arranged in:", options: ["Array", "Queue", "Stack (LIFO)", "Tree"], answer: 2, explanation: "Stack: newest on top (foreground), others pushed down" },
+    { q: "Manifest does NOT define:", options: ["Package name", "Business logic code", "Permissions", "Min SDK"], answer: 1, explanation: "Java/Kotlin files contain logic, not manifest" },
+    { q: "All activities declared with:", options: ["<component>", "<screen>", "<activity>", "<java>"], answer: 2, explanation: "<activity> tag declares each activity" },
+    { q: "Permission to access contacts:", options: ["android.permission.PHONE", "android.permission.READ_CONTACTS", "android.permission.CONTACT_LIST", "android.permission.PEOPLE"], answer: 1, explanation: "android.permission.READ_CONTACTS for contact access" },
+    { q: "Reference string in XML how?:", options: ["@string/name", "R.string.name", "$string{name}", "string[name]"], answer: 0, explanation: "In XML: @string/identifier (e.g., @string/app_name)" },
+    { q: "onPause() when?:", options: ["Back button", "Another activity foreground", "Phone off", "App deleted"], answer: 1, explanation: "onPause() when another activity takes focus" },
+  ]
+},
+
+];
+
+// ============= MORE CHAPTERS DATA =============
+// Adding remaining chapters with full content...
+
+// CHAPTER 4 - UI/LAYOUTS
+CHAPTERS.push({
+  id: 4,
+  title: "Ch.4 – UI Layouts & Views",
+  icon: "🎨",
+  color: "#ec4899",
+  content: `
+<h2>🎨 Android Graphical Interfaces</h2>
+
+<h3>Creating Android Interface</h3>
+<p>Two main elements required:</p>
+<ul>
+  <li><strong>XML Layout File:</strong> Defines UI structure (widgets, containers)</li>
+  <li><strong>Activity Class:</strong> Defines behavior and business logic</li>
+</ul>
+<p>This separation ensures clean architecture: presentation separate from logic.</p>
+
+<h3>Layout Properties</h3>
+<p><strong>Every view must define:</strong> android:layout_width and android:layout_height</p>
+
+<h4>Possible Values:</h4>
+<ul>
+  <li><strong>wrap_content:</strong> Element takes only space needed for its content</li>
+  <li><strong>match_parent:</strong> Element takes all available parent space</li>
+  <li><strong>Fixed dp:</strong> Exact size in density-independent pixels (not recommended)</li>
+</ul>
+
+<div class="code-block">
+<span class="kw">&lt;LinearLayout</span><br/>
+&nbsp;&nbsp;<span class="fn">android:layout_width</span>=<span class="str">"match_parent"</span><br/>
+&nbsp;&nbsp;<span class="fn">android:layout_height</span>=<span class="str">"match_parent"</span><br/>
+&nbsp;&nbsp;<span class="fn">android:orientation</span>=<span class="str">"vertical"</span><span class="kw">&gt;</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="kw">&lt;EditText</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="fn">android:layout_width</span>=<span class="str">"match_parent"</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="fn">android:layout_height</span>=<span class="str">"wrap_content"</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="fn">android:hint</span>=<span class="str">"@string/hint_text"</span> <span class="kw">/&gt;</span><br/>
+<span class="kw">&lt;/LinearLayout&gt;</span>
+</div>
+
+<h3>View Identifiers</h3>
+<p><strong>Assign IDs to reference views in code:</strong></p>
+<ul>
+  <li><strong>@+id/name:</strong> Creates new ID in R.java</li>
+  <li><strong>@id/name:</strong> References existing ID</li>
+</ul>
+
+<div class="code-block">
+<span class="cm">// In XML</span><br/>
+<span class="kw">&lt;Button</span><br/>
+&nbsp;&nbsp;<span class="fn">android:id</span>=<span class="str">"@+id/myButton"</span><br/>
+&nbsp;&nbsp;<span class="fn">android:text</span>=<span class="str">"Click Me"</span> <span class="kw">/&gt;</span><br/>
+<br/>
+<span class="cm">// In Java</span><br/>
+Button btn = findViewById(R.id.myButton);<br/>
+btn.setOnClickListener(v -> Toast.makeText(this, <span class="str">"Clicked!"</span>, Toast.LENGTH_SHORT).show());
+</div>
+
+<h3>Layout Types (ViewGroup)</h3>
+
+<h4>LinearLayout</h4>
+<p>Arranges children in single row or column.</p>
+<ul>
+  <li><strong>android:orientation="horizontal":</strong> Left to right</li>
+  <li><strong>android:orientation="vertical":</strong> Top to bottom</li>
+</ul>
+
+<div class="code-block">
+<span class="kw">&lt;LinearLayout</span><br/>
+&nbsp;&nbsp;<span class="fn">android:orientation</span>=<span class="str">"vertical"</span><br/>
+&nbsp;&nbsp;<span class="fn">android:layout_width</span>=<span class="str">"match_parent"</span><br/>
+&nbsp;&nbsp;<span class="fn">android:layout_height</span>=<span class="str">"match_parent"</span><span class="kw">&gt;</span><br/>
+&nbsp;&nbsp;<span class="kw">&lt;TextView</span> ... <span class="kw">/&gt;</span><br/>
+&nbsp;&nbsp;<span class="kw">&lt;Button</span> ... <span class="kw">/&gt;</span><br/>
+<span class="kw">&lt;/LinearLayout&gt;</span>
+</div>
+
+<h4>RelativeLayout</h4>
+<p>Positions children relative to each other or parent.</p>
+
+<h4>TableLayout</h4>
+<p>Organizes views in rows and columns.</p>
+
+<h4>AbsoluteLayout</h4>
+<p>❌ Deprecated — use ConstraintLayout instead.</p>
+
+<h3>Common Views (Widgets)</h3>
+
+<h4>TextView</h4>
+<p>Display text.</p>
+
+<h4>EditText</h4>
+<p>Text input from user.</p>
+
+<h4>Button</h4>
+<p>Clickable button.</p>
+
+<h4>CheckBox</h4>
+<p>On/off toggle.</p>
+
+<h4>ImageView</h4>
+<p>Display images.</p>
+
+<h4>RadioButton</h4>
+<p>Single selection from group.</p>
+
+<h3>Event Handling</h3>
+<p><strong>Respond to user actions (clicks, long-clicks, input).</strong></p>
+
+<div class="code-block">
+<span class="cm">// Anonymous OnClickListener</span><br/>
+Button btn = findViewById(R.id.myButton);<br/>
+btn.setOnClickListener(<span class="kw">new</span> View.OnClickListener() {<br/>
+&nbsp;&nbsp;<span class="kw">@Override</span><br/>
+&nbsp;&nbsp;<span class="kw">public void</span> onClick(View v) {<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Log.d(<span class="str">"TAG"</span>, <span class="str">"Button clicked!"</span>);<br/>
+&nbsp;&nbsp;}<br/>
+});<br/>
+<br/>
+<span class="cm">// Lambda (simpler)</span><br/>
+btn.setOnClickListener(v -> Log.d(<span class="str">"TAG"</span>, <span class="str">"Clicked!"</span>));
+</div>
+  `,
+
+  flashcards: [
+    { front: "match_parent means?", back: "Element takes all available space in parent container" },
+    { front: "wrap_content means?", back: "Element takes only space needed for its content" },
+    { front: "Create View ID in XML how?", back: "android:id=\"@+id/myName\" (@ creates in R.java)" },
+    { front: "LinearLayout with horizontal?", back: "android:orientation=\"horizontal\" — arranges left to right" },
+    { front: "RelativeLayout positions?", back: "Child views relative to each other or parent" },
+    { front: "TableLayout arranges in?", back: "Rows and columns (like HTML table)" },
+    { front: "AbsoluteLayout status?", back: "Deprecated, not recommended for different screen sizes" },
+    { front: "OnClickListener for?", back: "Handles click events on Views" },
+    { front: "findViewById(R.id.btn)?", back: "Retrieves View object by its resource ID" },
+    { front: "android:hint attribute?", back: "Shows placeholder text in EditText, disappears on focus" },
+  ],
+
+  quiz: [
+    { q: "match_parent makes view:", options: ["wrap_content", "all parent space", "fixed size", "min size"], answer: 1, explanation: "match_parent fills all available parent space" },
+    { q: "Create View ID with:", options: ["@id/name", "@+id/name", "@new/name", "#id/name"], answer: 1, explanation: "@+id/name creates new ID in R.java" },
+    { q: "TableLayout displays in:", options: ["Single list", "Grid", "Rows/columns", "Vertical only"], answer: 2, explanation: "TableLayout = rows and columns" },
+    { q: "android:orientation in:", options: ["RelativeLayout", "AbsoluteLayout", "LinearLayout", "TableLayout"], answer: 2, explanation: "Only LinearLayout uses orientation" },
+    { q: "AbsoluteLayout is:", options: ["Recommended", "Deprecated", "Default", "Required"], answer: 1, explanation: "AbsoluteLayout deprecated due to screen size issues" },
+    { q: "View parent class handles:", options: ["Only text", "Display + event management", "Only input", "Network"], answer: 1, explanation: "View = parent of all UI components" },
+    { q: "EditText inputType='textMultiLine':", options: ["Single line", "Numbers", "Multiple lines", "Passwords"], answer: 2, explanation: "textMultiLine allows multiline input" },
+    { q: "OnClickListener for:", options: ["Touch", "Click events", "Long press", "Drag"], answer: 1, explanation: "OnClickListener handles regular click events" },
+    { q: "setContentView() parameter:", options: ["Activity", "View", "Layout ID", "String"], answer: 2, explanation: "setContentView(R.layout.name) takes resource ID" },
+    { q: "All widgets in:", options: ["android.app", "android.view", "android.widget", "android.ui"], answer: 2, explanation: "android.widget package contains all views" },
+  ]
+});
+
+// Continue with remaining chapters... (same pattern)
+
+// CHAPTER 5
+CHAPTERS.push({
+  id: 5,
+  title: "Ch.5 – Intents & Navigation",
+  icon: "🔀",
+  color: "#f59e0b",
+  content: `
+<h2>🔀 Intents & Interactions Between Components</h2>
+
+<h3>What is an Intent?</h3>
+<p><strong>Abstract description of an operation to perform.</strong> Enables communication between Android components.</p>
+
+<h4>Common Uses:</h4>
+<ul>
+  <li>Launch an activity</li>
+  <li>Request services from other apps</li>
+  <li>Send data between components</li>
+  <li>Broadcast events</li>
+</ul>
+
+<h3>Explicit Intent</h3>
+<p><strong>Specifies exact target activity class.</strong> Used within same app.</p>
+
+<div class="code-block">
+Intent intent = <span class="kw">new</span> Intent(MainActivity.<span class="kw">this</span>, SecondActivity.<span class="kw">class</span>);<br/>
+startActivity(intent);
+</div>
+
+<h3>Implicit Intent</h3>
+<p><strong>No target specified.</strong> System finds best matching component.</p>
+
+<div class="code-block">
+<span class="cm">// Open URL in browser</span><br/>
+Uri uri = Uri.parse(<span class="str">"https://www.google.com"</span>);<br/>
+Intent browserIntent = <span class="kw">new</span> Intent(Intent.ACTION_VIEW, uri);<br/>
+startActivity(browserIntent);<br/>
+<br/>
+<span class="cm">// Make phone call</span><br/>
+Uri dialUri = Uri.parse(<span class="str">"tel:0551234567"</span>);<br/>
+Intent callIntent = <span class="kw">new</span> Intent(Intent.ACTION_DIAL, dialUri);<br/>
+startActivity(callIntent);
+</div>
+
+<h3>Passing Data Between Activities</h3>
+
+<h4>Sending Data:</h4>
+<div class="code-block">
+Intent intent = <span class="kw">new</span> Intent(MainActivity.<span class="kw">this</span>, SecondActivity.<span class="kw">class</span>);<br/>
+intent.putExtra(<span class="str">"username"</span>, <span class="str">"Ahmed"</span>);<br/>
+intent.putExtra(<span class="str">"age"</span>, 25);<br/>
+startActivity(intent);
+</div>
+
+<h4>Receiving Data:</h4>
+<div class="code-block">
+<span class="kw">@Override</span><br/>
+<span class="kw">protected void</span> onCreate(Bundle savedInstanceState) {<br/>
+&nbsp;&nbsp;<span class="kw">super</span>.onCreate(savedInstanceState);<br/>
+&nbsp;&nbsp;setContentView(R.layout.activity_second);<br/>
+&nbsp;&nbsp;<br/>
+&nbsp;&nbsp;Bundle extras = getIntent().getExtras();<br/>
+&nbsp;&nbsp;<span class="kw">if</span> (extras != <span class="kw">null</span>) {<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;String username = extras.getString(<span class="str">"username"</span>);<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">int</span> age = extras.getInt(<span class="str">"age"</span>, 0);<br/>
+&nbsp;&nbsp;}<br/>
+}
+</div>
+
+<h3>startActivityForResult</h3>
+<p><strong>Launch activity expecting result back.</strong></p>
+
+<div class="code-block">
+<span class="cm">// Launch activity and wait for result</span><br/>
+<span class="kw">int</span> REQUEST_CODE = 1;<br/>
+Intent intent = <span class="kw">new</span> Intent(MainActivity.<span class="kw">this</span>, SecondActivity.<span class="kw">class</span>);<br/>
+startActivityForResult(intent, REQUEST_CODE);<br/>
+<br/>
+<span class="cm">// Handle result</span><br/>
+<span class="kw">@Override</span><br/>
+<span class="kw">protected void</span> onActivityResult(<span class="kw">int</span> requestCode, <span class="kw">int</span> resultCode, Intent data) {<br/>
+&nbsp;&nbsp;<span class="kw">super</span>.onActivityResult(requestCode, resultCode, data);<br/>
+&nbsp;&nbsp;<span class="kw">if</span> (requestCode == REQUEST_CODE && resultCode == RESULT_OK) {<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;String result = data.getStringExtra(<span class="str">"result"</span>);<br/>
+&nbsp;&nbsp;}<br/>
+}
+</div>
+  `,
+
+  flashcards: [
+    { front: "Explicit Intent specifies?", back: "Exact target activity class" },
+    { front: "Implicit Intent specifies?", back: "Action and data; system finds best component" },
+    { front: "Send Intent data how?", back: "intent.putExtra(\"key\", value)" },
+    { front: "Receive Intent data how?", back: "Bundle b = getIntent().getExtras(); b.getString(\"key\")" },
+    { front: "startActivity() launches?", back: "Activity without expecting result" },
+    { front: "startActivityForResult() launches?", back: "Activity expecting result via onActivityResult()" },
+    { front: "getIntent() used for?", back: "Retrieves Intent that started current Activity" },
+    { front: "Intent.ACTION_VIEW does?", back: "Opens URI in appropriate app (browser, maps, etc.)" },
+    { front: "Intent.ACTION_DIAL for?", back: "Opens phone dialer with number pre-filled" },
+    { front: "Intent Extras are?", back: "Key-value pairs in Bundle attached to Intent" },
+  ],
+
+  quiz: [
+    { q: "Explicit Intent specifies:", options: ["Only data", "Exact class", "System action", "No target"], answer: 1, explanation: "Explicit = exact component class" },
+    { q: "Implicit Intent does NOT specify:", options: ["Action", "Data", "Target component", "MIME type"], answer: 2, explanation: "Implicit lets system resolve best match" },
+    { q: "Send Intent data with:", options: ["addData", "setExtra", "putExtra", "sendData"], answer: 2, explanation: "putExtra(key, value) attaches data" },
+    { q: "startActivity() for:", options: ["Creating", "Launching without result", "Get result", "Stop"], answer: 1, explanation: "startActivity() launches, no return" },
+    { q: "ACTION_VIEW opens:", options: ["App settings", "Appropriate app for URI", "System dialog", "File manager"], answer: 1, explanation: "ACTION_VIEW opens appropriate app for URI" },
+    { q: "Get Intent with:", options: ["Intent i = new Intent()","Intent i = getIntent()","getExtra()","Intent.get()"], answer: 1, explanation: "getIntent() retrieves Intent that started activity" },
+    { q: "Intent data in:", options: ["HashMap", "SharedPreferences", "Bundle", "Cursor"], answer: 2, explanation: "Bundle encapsulates Intent extras" },
+    { q: "Get String from Bundle:", options: ["getString(\"k\")","getExtra(\"k\")","readString(\"k\")","fetchString(\"k\")"], answer: 0, explanation: "Bundle.getString(\"key\") retrieves String" },
+    { q: "ACTION_DIAL for:", options: ["Send SMS", "Dial number", "Open email", "Play audio"], answer: 1, explanation: "ACTION_DIAL opens dialer with number" },
+    { q: "Flags in Intent modify:", options: ["Target", "Data", "Behavior", "MIME type"], answer: 2, explanation: "Flags modify Intent and activity behavior" },
+  ]
+});
+
+// CHAPTER 6 - MENUS
+CHAPTERS.push({
+  id: 6,
+  title: "Ch.6 – Menus & Dialogs",
+  icon: "☰",
+  color: "#10b981",
+  content: `
+<h2>☰ Menus & Dialogs</h2>
+
+<h3>Menu</h3>
+<p><strong>List of items providing additional functions.</strong> Helps manage limited screen space.</p>
+
+<h4>Creating a Menu:</h4>
+
+<h4>1. XML Definition (res/menu/main_menu.xml):</h4>
+<div class="code-block">
+<span class="kw">&lt;menu</span> <span class="fn">xmlns:android</span>=<span class="str">"http://schemas.android.com/apk/res/android"</span><span class="kw">&gt;</span><br/>
+&nbsp;&nbsp;<span class="kw">&lt;item</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="fn">android:id</span>=<span class="str">"@+id/menu_save"</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="fn">android:icon</span>=<span class="str">"@drawable/ic_save"</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="fn">android:title</span>=<span class="str">"@string/save"</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="fn">android:showAsAction</span>=<span class="str">"ifRoom"</span> <span class="kw">/&gt;</span><br/>
+&nbsp;&nbsp;<br/>
+&nbsp;&nbsp;<span class="kw">&lt;item</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="fn">android:id</span>=<span class="str">"@+id/menu_settings"</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="fn">android:title</span>=<span class="str">"@string/settings"</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="fn">android:showAsAction</span>=<span class="str">"never"</span> <span class="kw">/&gt;</span><br/>
+<span class="kw">&lt;/menu&gt;</span>
+</div>
+
+<h4>showAsAction Values:</h4>
+<ul>
+  <li><strong>ifRoom:</strong> Place in app bar only if space available</li>
+  <li><strong>always:</strong> Always place in app bar</li>
+  <li><strong>never:</strong> Never place in app bar (overflow menu only)</li>
+</ul>
+
+<h4>2. Callback Methods:</h4>
+<div class="code-block">
+<span class="cm">// Inflate and display menu</span><br/>
+<span class="kw">@Override</span><br/>
+<span class="kw">public boolean</span> onCreateOptionsMenu(Menu menu) {<br/>
+&nbsp;&nbsp;getMenuInflater().inflate(R.menu.main_menu, menu);<br/>
+&nbsp;&nbsp;<span class="kw">return true</span>;<br/>
+}<br/>
+<br/>
+<span class="cm">// Handle menu item clicks</span><br/>
+<span class="kw">@Override</span><br/>
+<span class="kw">public boolean</span> onOptionsItemSelected(MenuItem item) {<br/>
+&nbsp;&nbsp;<span class="kw">switch</span> (item.getItemId()) {<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">case</span> R.id.menu_save:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Log.d(<span class="str">"TAG"</span>, <span class="str">"Save clicked"</span>);<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">return true</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">case</span> R.id.menu_settings:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Log.d(<span class="str">"TAG"</span>, <span class="str">"Settings clicked"</span>);<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">return true</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">default</span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">return super</span>.onOptionsItemSelected(item);<br/>
+&nbsp;&nbsp;}<br/>
+}
+</div>
+
+<h3>Dialog</h3>
+<p><strong>Small window prompting user for decision.</strong> Three components: Title, Actions, Content.</p>
+
+<div class="code-block">
+<span class="cm">// AlertDialog Example</span><br/>
+<span class="kw">new</span> AlertDialog.Builder(MainActivity.<span class="kw">this</span>)<br/>
+&nbsp;&nbsp;.setTitle(<span class="str">"Confirm Delete"</span>)<br/>
+&nbsp;&nbsp;.setMessage(<span class="str">"Delete this item?"</span>)<br/>
+&nbsp;&nbsp;.setPositiveButton(<span class="str">"Delete"</span>, (dialog, id) -> {<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Log.d(<span class="str">"TAG"</span>, <span class="str">"Item deleted"</span>);<br/>
+&nbsp;&nbsp;})<br/>
+&nbsp;&nbsp;.setNegativeButton(<span class="str">"Cancel"</span>, (dialog, id) -> {<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;dialog.dismiss();<br/>
+&nbsp;&nbsp;})<br/>
+&nbsp;&nbsp;.show();
+</div>
+
+<h3>Toast Notification</h3>
+<p><strong>Short message shown briefly.</strong></p>
+
+<div class="code-block">
+Toast.makeText(MainActivity.<span class="kw">this</span>, <span class="str">"Operation complete!"</span>, Toast.LENGTH_SHORT).show();
+</div>
+  `,
+
+  flashcards: [
+    { front: "MenuInflater purpose?", back: "Parser for XML menu files. inflate() creates Views from XML" },
+    { front: "Inflate menu method?", back: "onCreateOptionsMenu(Menu) { getMenuInflater().inflate(R.menu.name, menu); return true; }" },
+    { front: "Handle menu selection?", back: "onOptionsItemSelected(MenuItem) — switch(item.getItemId())" },
+    { front: "Dialog 3 components?", back: "Title, Actions (buttons), Content (message/view)" },
+    { front: "Toast notification?", back: "Short message shown 2-5 seconds via Toast.makeText().show()" },
+    { front: "showAsAction=\"never\"?", back: "Menu item NEVER in app bar — goes to overflow menu" },
+    { front: "showAsAction=\"always\"?", back: "Menu item ALWAYS in app bar as action button" },
+  ],
+
+  quiz: [
+    { q: "Menu associated with:", options: ["Entire app", "Single Activity", "Multiple activities", "System only"], answer: 1, explanation: "Each menu for one Activity" },
+    { q: "Menu XML location:", options: ["res/layout", "res/drawable", "res/menu", "res/xml"], answer: 2, explanation: "Menu in res/menu/" },
+    { q: "onCreateOptionsMenu() return:", options: ["false", "true", "Menu", "void"], answer: 1, explanation: "Return true to display menu" },
+    { q: "showAsAction='ifRoom':", options: ["always", "never", "if space available", "sometimes"], answer: 2, explanation: "ifRoom = only if space" },
+    { q: "inflate() parameters:", options: ["(menu, activity)", "(context, menu)", "(R.menu.name, menu)", "(String, Menu)"], answer: 2, explanation: "inflate(R.menu.name, menu)" },
+    { q: "Identify clicked item:", options: ["item.getTitle()","item.getItemId()","item.getId()","item.getAction()"], answer: 1, explanation: "item.getItemId() returns resource ID" },
+    { q: "Dialog window:", options: ["Full screen", "Small, not filling", "No buttons", "No title"], answer: 1, explanation: "Dialog = small window" },
+    { q: "Toast duration:", options: ["LENGTH_INSTANT","LENGTH_SHORT, LENGTH_LONG","LENGTH_MEDIUM","None"], answer: 1, explanation: "SHORT (2s), LONG (5s)" },
+    { q: "MenuInflater access:", options: ["new MenuInflater()","getMenuInflater()","MenuInflater.getInstance()","activity.inflate()"], answer: 1, explanation: "getMenuInflater() returns Activity's instance" },
+    { q: "Three menu showAsAction values?", options: ["ifRoom","always, never, ifRoom","sometimes, always","never, maybe"], answer: 1, explanation: "Values: ifRoom, always, never" },
+  ]
+});
+
+// CHAPTER 7 - LISTVIEW
+CHAPTERS.push({
+  id: 7,
+  title: "Ch.7 – ListView & Adapters",
+  icon: "📋",
+  color: "#f97316",
+  content: `
+<h2>📋 ListView & Adapters</h2>
+
+<h3>ListView</h3>
+<p><strong>Displays scrollable list of items.</strong> Adapter connects data to view.</p>
+
+<h3>Adapter Pattern</h3>
+<p>Architecture: Data → Adapter → AdapterView (ListView, GridView, Spinner)</p>
+
+<h4>Adapter Types:</h4>
+<ul>
+  <li><strong>ArrayAdapter:</strong> Simple text from array/list</li>
+  <li><strong>SimpleAdapter:</strong> Multiple fields per item (name + age)</li>
+  <li><strong>CursorAdapter:</strong> SQLite database data</li>
+</ul>
+
+<h3>ArrayAdapter Example</h3>
+<div class="code-block">
+<span class="cm">// Create adapter from array</span><br/>
+String[] fruits = {<span class="str">"Apple"</span>, <span class="str">"Banana"</span>, <span class="str">"Orange"</span>, <span class="str">"Mango"</span>};<br/>
+ArrayAdapter&lt;String&gt; adapter = <span class="kw">new</span> ArrayAdapter&lt;&gt;(<br/>
+&nbsp;&nbsp;MainActivity.<span class="kw">this</span>,<br/>
+&nbsp;&nbsp;android.R.layout.simple_list_item_1,<br/>
+&nbsp;&nbsp;fruits<br/>
+);<br/>
+<br/>
+<span class="cm">// Attach to ListView</span><br/>
+ListView listView = findViewById(R.id.listView);<br/>
+listView.setAdapter(adapter);<br/>
+<br/>
+<span class="cm">// Handle item clicks</span><br/>
+listView.setOnItemClickListener((parent, view, position, id) -> {<br/>
+&nbsp;&nbsp;String selected = (String) parent.getItemAtPosition(position);<br/>
+&nbsp;&nbsp;Toast.makeText(MainActivity.<span class="kw">this</span>, selected, Toast.LENGTH_SHORT).show();<br/>
+});
+</div>
+
+<h3>Custom Adapter</h3>
+<div class="code-block">
+<span class="kw">public class</span> MyAdapter <span class="kw">extends</span> BaseAdapter {<br/>
+&nbsp;&nbsp;<span class="kw">private</span> List&lt;String&gt; data;<br/>
+<br/>
+&nbsp;&nbsp;<span class="kw">@Override</span><br/>
+&nbsp;&nbsp;<span class="kw">public int</span> getCount() {<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">return</span> data.size();<br/>
+&nbsp;&nbsp;}<br/>
+<br/>
+&nbsp;&nbsp;<span class="kw">@Override</span><br/>
+&nbsp;&nbsp;<span class="kw">public Object</span> getItem(<span class="kw">int</span> position) {<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">return</span> data.get(position);<br/>
+&nbsp;&nbsp;}<br/>
+<br/>
+&nbsp;&nbsp;<span class="kw">@Override</span><br/>
+&nbsp;&nbsp;<span class="kw">public View</span> getView(<span class="kw">int</span> position, View convertView, ViewGroup parent) {<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="cm">// Reuse convertView if not null (ViewHolder pattern)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">if</span> (convertView == <span class="kw">null</span>) {<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;convertView = LayoutInflater.from(parent.getContext())<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.inflate(android.R.layout.simple_list_item_1, parent, <span class="kw">false</span>);<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;}<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;TextView tv = convertView.findViewById(android.R.id.text1);<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;tv.setText(data.get(position));<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">return</span> convertView;<br/>
+&nbsp;&nbsp;}<br/>
+}
+</div>
+
+<h3>Filtering</h3>
+<div class="code-block">
+<span class="cm">// Filter list as user types</span><br/>
+EditText filterEdit = findViewById(R.id.filterText);<br/>
+filterEdit.addTextChangedListener(<span class="kw">new</span> TextWatcher() {<br/>
+&nbsp;&nbsp;<span class="kw">@Override</span><br/>
+&nbsp;&nbsp;<span class="kw">public void</span> onTextChanged(CharSequence s, <span class="kw">int</span> start, <span class="kw">int</span> before, <span class="kw">int</span> count) {<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;adapter.getFilter().filter(s);<br/>
+&nbsp;&nbsp;}<br/>
+&nbsp;&nbsp;<br/>
+&nbsp;&nbsp;<span class="cm">// Other required methods...</span><br/>
+&nbsp;&nbsp;<span class="kw">@Override public void</span> beforeTextChanged(...) { }<br/>
+&nbsp;&nbsp;<span class="kw">@Override public void</span> afterTextChanged(...) { }<br/>
+});
+</div>
+
+<h3>Update ListView</h3>
+<div class="code-block">
+<span class="cm">// After data change, notify adapter</span><br/>
+data.add(<span class="str">"New Item"</span>);<br/>
+adapter.notifyDataSetChanged();<br/>
+<span class="cm">// ListView automatically refreshes</span>
+</div>
+  `,
+
+  flashcards: [
+    { front: "Set adapter to ListView?", back: "listView.setAdapter(adapter)" },
+    { front: "notifyDataSetChanged() does?", back: "Refreshes ListView after data change" },
+    { front: "ViewHolder pattern for?", back: "Caches View references to avoid repeated findViewById()" },
+    { front: "Filter ListView how?", back: "adapter.getFilter().filter(charSequence)" },
+    { front: "simple_list_item_1 is?", back: "Built-in single TextView layout" },
+    { front: "Handle ListView clicks?", back: "listView.setOnItemClickListener() with onItemClick()" },
+    { front: "ArrayAdapter constructor params?", back: "Context, layout resource, data array" },
+    { front: "CustomAdapter extend?", back: "BaseAdapter, override getCount(), getItem(), getView()" },
+    { front: "GridView vs ListView?", back: "GridView: 2D grid; ListView: 1D list" },
+    { front: "CursorAdapter for?", back: "Display SQLite database Cursor data" },
+  ],
+
+  quiz: [
+    { q: "Custom BaseAdapter overrides:", options: ["getView()","getCount(), getView()","All 4","Only getItem()"], answer: 2, explanation: "getCount(), getItem(), getItemId(), getView()" },
+    { q: "After data change, refresh:", options: ["refresh()","update()","notifyDataSetChanged()","invalidate()"], answer: 2, explanation: "notifyDataSetChanged() notifies observers" },
+    { q: "simple_list_item_1 is:", options: ["Custom","Built-in","Menu","Activity"], answer: 1, explanation: "Android's built-in single TextView layout" },
+    { q: "ViewHolder improves by:", options: ["Memory","Avoiding findViewById()","Speed","Compression"], answer: 1, explanation: "Caches View references" },
+    { q: "getFilter().filter() for:", options: ["Sorting","Searching/filtering","Deleting","Animating"], answer: 1, explanation: "Filters based on constraint" },
+    { q: "onItemClick provides position:", options: ["index","id","position","item"], answer: 2, explanation: "int position parameter" },
+    { q: "SimpleAdapter data source:", options: ["Array","Cursor","List<Map>","ArrayList"], answer: 2, explanation: "List of Maps" },
+    { q: "GridView displays:", options: ["List","Dropdown","Grid (2D)","Single"], answer: 2, explanation: "2D grid layout" },
+    { q: "Spinner uses:", options: ["CursorAdapter","ArrayAdapter","BaseAdapter","None"], answer: 1, explanation: "ArrayAdapter or SimpleAdapter" },
+    { q: "Get item in ListView:", options: ["listView.getItem()","adapter.getItemAtPosition()","parent.getItemAtPosition()","listView.get()"], answer: 2, explanation: "In onItemClick: parent.getItemAtPosition(position)" },
+  ]
+});
+
+// CHAPTER 8 - DATA PERSISTENCE
+CHAPTERS.push({
+  id: 8,
+  title: "Ch.8 – Data Persistence & SQLite",
+  icon: "💾",
+  color: "#ef4444",
+  content: `
+<h2>💾 Data Persistence in Android</h2>
+
+<h3>4 Persistence Techniques</h3>
+<ol>
+  <li><strong>Activity State (Bundle):</strong> Temporary, during activity lifecycle</li>
+  <li><strong>SharedPreferences:</strong> Simple key-value pairs</li>
+  <li><strong>File System:</strong> Internal or external storage</li>
+  <li><strong>SQLite Database:</strong> Structured relational data</li>
+</ol>
+
+<h3>1. Activity State Persistence</h3>
+<div class="code-block">
+<span class="cm">// Save state before activity killed</span><br/>
+<span class="kw">@Override</span><br/>
+<span class="kw">protected void</span> onSaveInstanceState(Bundle outState) {<br/>
+&nbsp;&nbsp;<span class="kw">super</span>.onSaveInstanceState(outState);<br/>
+&nbsp;&nbsp;outState.putString(<span class="str">"text"</span>, editText.getText().toString());<br/>
+&nbsp;&nbsp;outState.putInt(<span class="str">"number"</span>, 42);<br/>
+}<br/>
+<br/>
+<span class="cm">// Restore state in onCreate</span><br/>
+<span class="kw">@Override</span><br/>
+<span class="kw">protected void</span> onCreate(Bundle savedInstanceState) {<br/>
+&nbsp;&nbsp;<span class="kw">super</span>.onCreate(savedInstanceState);<br/>
+&nbsp;&nbsp;<span class="kw">if</span> (savedInstanceState != <span class="kw">null</span>) {<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;String text = savedInstanceState.getString(<span class="str">"text"</span>);<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">int</span> number = savedInstanceState.getInt(<span class="str">"number"</span>);<br/>
+&nbsp;&nbsp;}<br/>
+}
+</div>
+
+<h3>2. SharedPreferences (Key-Value)</h3>
+<div class="code-block">
+<span class="cm">// Write preferences</span><br/>
+SharedPreferences prefs = getSharedPreferences(<span class="str">"myPrefs"</span>, MODE_PRIVATE);<br/>
+SharedPreferences.Editor editor = prefs.edit();<br/>
+editor.putString(<span class="str">"username"</span>, <span class="str">"Ahmed"</span>);<br/>
+editor.putInt(<span class="str">"score"</span>, 100);<br/>
+editor.putBoolean(<span class="str">"isLoggedIn"</span>, <span class="kw">true</span>);<br/>
+editor.apply();  <span class="cm">// Async, or commit() for sync</span><br/>
+<br/>
+<span class="cm">// Read preferences</span><br/>
+String username = prefs.getString(<span class="str">"username"</span>, <span class="str">"Guest"</span>);<br/>
+<span class="kw">int</span> score = prefs.getInt(<span class="str">"score"</span>, 0);<br/>
+<span class="kw">boolean</span> isLoggedIn = prefs.getBoolean(<span class="str">"isLoggedIn"</span>, <span class="kw">false</span>);
+</div>
+
+<h3>3. File System (Internal Storage)</h3>
+<div class="code-block">
+<span class="cm">// Write to file</span><br/>
+<span class="kw">try</span> {<br/>
+&nbsp;&nbsp;FileOutputStream fos = openFileOutput(<span class="str">"myfile.txt"</span>, MODE_PRIVATE);<br/>
+&nbsp;&nbsp;fos.write(<span class="str">"Hello World"</span>.getBytes());<br/>
+&nbsp;&nbsp;fos.close();<br/>
+} <span class="kw">catch</span> (IOException e) {<br/>
+&nbsp;&nbsp;e.printStackTrace();<br/>
+}<br/>
+<br/>
+<span class="cm">// Read from file</span><br/>
+<span class="kw">try</span> {<br/>
+&nbsp;&nbsp;FileInputStream fis = openFileInput(<span class="str">"myfile.txt"</span>);<br/>
+&nbsp;&nbsp;BufferedReader reader = <span class="kw">new</span> BufferedReader(<span class="kw">new</span> InputStreamReader(fis));<br/>
+&nbsp;&nbsp;String line = reader.readLine();<br/>
+&nbsp;&nbsp;reader.close();<br/>
+} <span class="kw">catch</span> (IOException e) {<br/>
+&nbsp;&nbsp;e.printStackTrace();<br/>
+}
+</div>
+
+<h3>4. SQLite Database</h3>
+
+<h4>SQLiteOpenHelper (Recommended)</h4>
+<div class="code-block">
+<span class="kw">public class</span> DatabaseHelper <span class="kw">extends</span> SQLiteOpenHelper {<br/>
+&nbsp;&nbsp;<span class="kw">private static final</span> String DATABASE_NAME = <span class="str">"mydb"</span>;<br/>
+&nbsp;&nbsp;<span class="kw">private static final int</span> DATABASE_VERSION = 1;<br/>
+<br/>
+&nbsp;&nbsp;<span class="kw">public</span> DatabaseHelper(Context context) {<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">super</span>(context, DATABASE_NAME, <span class="kw">null</span>, DATABASE_VERSION);<br/>
+&nbsp;&nbsp;}<br/>
+<br/>
+&nbsp;&nbsp;<span class="cm">// Called on first run</span><br/>
+&nbsp;&nbsp;<span class="kw">@Override</span><br/>
+&nbsp;&nbsp;<span class="kw">public void</span> onCreate(SQLiteDatabase db) {<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;String sql = <span class="str">"CREATE TABLE users ("</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="str">"id INTEGER PRIMARY KEY,"</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="str">"name TEXT,"</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="str">"age INTEGER)"</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;db.execSQL(sql);<br/>
+&nbsp;&nbsp;}<br/>
+<br/>
+&nbsp;&nbsp;<span class="cm">// Called on version upgrade</span><br/>
+&nbsp;&nbsp;<span class="kw">@Override</span><br/>
+&nbsp;&nbsp;<span class="kw">public void</span> onUpgrade(SQLiteDatabase db, <span class="kw">int</span> oldV, <span class="kw">int</span> newV) {<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;db.execSQL(<span class="str">"DROP TABLE IF EXISTS users"</span>);<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;onCreate(db);<br/>
+&nbsp;&nbsp;}<br/>
+}
+</div>
+
+<h4>Insert Data</h4>
+<div class="code-block">
+DatabaseHelper dbHelper = <span class="kw">new</span> DatabaseHelper(context);<br/>
+SQLiteDatabase db = dbHelper.getWritableDatabase();<br/>
+<br/>
+ContentValues values = <span class="kw">new</span> ContentValues();<br/>
+values.put(<span class="str">"name"</span>, <span class="str">"Ahmed"</span>);<br/>
+values.put(<span class="str">"age"</span>, 25);<br/>
+<span class="kw">long</span> id = db.insert(<span class="str">"users"</span>, <span class="kw">null</span>, values);
+</div>
+
+<h4>Query Data</h4>
+<div class="code-block">
+Cursor cursor = db.rawQuery(<span class="str">"SELECT * FROM users"</span>, <span class="kw">null</span>);<br/>
+<span class="kw">if</span> (cursor.moveToFirst()) {<br/>
+&nbsp;&nbsp;<span class="kw">do</span> {<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;String name = cursor.getString(cursor.getColumnIndex(<span class="str">"name"</span>));<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">int</span> age = cursor.getInt(cursor.getColumnIndex(<span class="str">"age"</span>));<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Log.d(<span class="str">"TAG"</span>, name + <span class="str">", "</span> + age);<br/>
+&nbsp;&nbsp;} <span class="kw">while</span> (cursor.moveToNext());<br/>
+}<br/>
+cursor.close();
+</div>
+  `,
+
+  flashcards: [
+    { front: "Write SharedPreferences?", back: "SharedPreferences.Editor e = prefs.edit(); e.putString(\"k\", \"v\"); e.apply()" },
+    { front: "SQLiteOpenHelper solves?", back: "1. First run: create tables. 2. Upgrade: migrate schema" },
+    { front: "execSQL vs rawQuery?", back: "execSQL: no result. rawQuery: returns Cursor (SELECT)" },
+    { front: "Cursor for?", back: "Represents SELECT result, iterate with moveToFirst(), moveToNext()" },
+    { front: "Read internal file?", back: "FileInputStream fis = openFileInput(\"filename\"); BufferedReader..." },
+    { front: "onSaveInstanceState() when?", back: "Before activity killed, to save UI state" },
+    { front: "ContentValues for?", back: "Key-value map for insert()/update() operations" },
+    { front: "MODE_PRIVATE means?", back: "Preferences file private — only app accesses" },
+    { front: "Get writable database?", back: "SQLiteDatabase db = myHelper.getWritableDatabase()" },
+    { front: "4 persistence types?", back: "Activity state (Bundle), SharedPrefs, File, SQLite" },
+    { front: "Cursor.moveToFirst() returns?", back: "true if data exists, false if empty" },
+    { front: "Delete preference?", back: "Editor.remove(\"key\"); apply()" },
+  ],
+
+  quiz: [
+    { q: "Android persistence techniques:", options: ["2", "3", "4", "5"], answer: 2, explanation: "4 techniques" },
+    { q: "SQLiteOpenHelper handles:", options: ["Network", "First run + upgrades", "SharedPrefs", "File I/O"], answer: 1, explanation: "onCreate + onUpgrade" },
+    { q: "SELECT query method:", options: ["execSQL", "runQuery", "rawQuery", "selectSQL"], answer: 2, explanation: "rawQuery() returns Cursor" },
+    { q: "execSQL() for:", options: ["SELECT", "No result SQL", "All queries", "Reading"], answer: 1, explanation: "DDL/DML without SELECT" },
+    { q: "SharedPreferences.Editor.apply():", options: ["Start transaction", "Save changes async", "Rollback", "Create file"], answer: 1, explanation: "apply() async, commit() sync" },
+    { q: "openFileOutput() writes:", options: ["SD card", "Network", "Internal storage", "SharedPrefs"], answer: 2, explanation: "Internal private storage" },
+    { q: "Read SharedPreferences:", options: ["read()", "getValue()", "getString(k, def)", "get()"], answer: 2, explanation: "getString(key, default)" },
+    { q: "onSaveInstanceState() when?:", options: ["Resume", "Before kill", "Back button", "After"], answer: 1, explanation: "Before system kills" },
+    { q: "ContentValues for:", options: ["rawQuery", "execSQL", "insert/update", "cursor"], answer: 2, explanation: "insert()/update() parameter" },
+    { q: "Cursor.moveToFirst():", options: ["true", "data", "true if data", "void"], answer: 2, explanation: "true if exists, false empty" },
+  ]
+});
+
+/* ============================================================
+   INITIALIZE & MAIN LOGIC
+============================================================ */
+
+let currentFlashcards = [];
+let quizState = { questions: [], answered: 0, score: 0 };
+
+document.addEventListener('DOMContentLoaded', () => {
+  buildCourseTabs();
+  buildFlashcardFilter();
+  buildQuizSelects();
+  renderFlashcards();
+  startQuiz();
+});
+
+function buildCourseTabs() {
+  const tabs = document.getElementById('courseTabs');
+  tabs.innerHTML = CHAPTERS.map(ch => `
+    <button class="tab-small" onclick="showChapterContent(${ch.id})">
+      ${ch.icon} ${ch.title.split('–')[1].trim()}
+    </button>
+  `).join('');
+}
+
+function showChapterContent(id) {
+  const ch = CHAPTERS.find(c => c.id === id);
+  const panel = document.getElementById('contentPanel');
+  panel.innerHTML = ch.content;
+  panel.style.display = 'block';
+  document.querySelectorAll('.tab-small').forEach(t => t.classList.remove('active'));
+  event.target.classList.add('active');
+  panel.scrollIntoView({ behavior: 'smooth' });
+}
+
+function showSection(id) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  event.currentTarget.classList.add('active');
+}
+
+function buildFlashcardFilter() {
+  const sel = document.getElementById('fcChapterFilter');
+  CHAPTERS.forEach(ch => {
+    const opt = document.createElement('option');
+    opt.value = ch.id;
+    opt.textContent = ch.icon + ' ' + ch.title;
+    sel.appendChild(opt);
+  });
+}
+
+function renderFlashcards() {
+  const filter = document.getElementById('fcChapterFilter').value;
+  let cards = [];
+  if (filter === 'all') {
+    CHAPTERS.forEach(ch => ch.flashcards.forEach(fc => cards.push({...fc, chapter: ch.title})));
+  } else {
+    const ch = CHAPTERS.find(c => c.id == filter);
+    if (ch) cards = ch.flashcards.map(fc => ({...fc, chapter: ch.title}));
+  }
+  document.getElementById('fcCount').textContent = `${cards.length} cards`;
+  const grid = document.getElementById('flashcardGrid');
+  grid.innerHTML = cards.map((fc, i) => `
+    <div class="flashcard" onclick="this.classList.toggle('flipped')">
+      <div class="fc-inner">
+        <div class="fc-front">
+          <div>
+            <div style="font-size:0.65rem; color:var(--muted); margin-bottom:8px;">${fc.chapter}</div>
+            ${fc.front}
+          </div>
+        </div>
+        <div class="fc-back">${fc.back.replace(/\n/g, '<br>')}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function buildQuizSelects() {
+  const sel = document.getElementById('quizChapterSelect');
+  CHAPTERS.forEach(ch => {
+    const opt = document.createElement('option');
+    opt.value = ch.id;
+    opt.textContent = ch.icon + ' ' + ch.title;
+    sel.appendChild(opt);
+  });
+}
+
+function startQuiz() {
+  const filter = document.getElementById('quizChapterSelect').value;
+  let allQ = [];
+  if (filter === 'all') {
+    CHAPTERS.forEach(ch => ch.quiz.forEach(q => allQ.push({...q, ch: ch.title})));
+  } else {
+    const ch = CHAPTERS.find(c => c.id == filter);
+    if (ch) allQ = ch.quiz.map(q => ({...q, ch: ch.title}));
+  }
+  allQ = allQ.sort(() => Math.random() - 0.5);
+  quizState = { questions: allQ, answered: 0, score: 0, total: allQ.length };
+  renderQuizStats();
+  renderQuizQuestions();
+}
+
+function renderQuizStats() {
+  const bar = document.getElementById('quizStatsBar');
+  bar.innerHTML = `
+    <div class="stat-pill"><span class="num">${quizState.total}</span> Questions</div>
+    <div class="stat-pill"><span class="num" id="statAnswered">0</span> Answered</div>
+    <div class="stat-pill"><span class="num" id="statScore" style="color:var(--green)">0</span> Correct</div>
+  `;
+}
+
+function renderQuizQuestions() {
+  const container = document.getElementById('quizContainer');
+  const letters = ['A', 'B', 'C', 'D'];
+  container.innerHTML = quizState.questions.map((q, qi) => `
+    <div class="question-card">
+      <div class="question-num">Q${qi+1} / ${quizState.questions.length} — ${q.ch}</div>
+      <div class="question-text">${q.q}</div>
+      <div class="options">
+        ${q.options.map((opt, oi) => `
+          <button class="option-btn" id="opt-${qi}-${oi}" onclick="answerQuestion(${qi}, ${oi})">
+            <span class="option-letter">${letters[oi]}</span>
+            ${opt}
+          </button>
+        `).join('')}
+      </div>
+      <div class="explanation" id="exp-${qi}">${q.explanation || ''}</div>
+    </div>
+  `).join('');
+}
+
+function answerQuestion(qi, chosenIdx) {
+  const q = quizState.questions[qi];
+  const btns = document.querySelectorAll(`[id^="opt-${qi}-"]`);
+  if (btns[0].disabled) return;
+  btns.forEach(b => b.disabled = true);
+  const correct = q.answer;
+  btns[chosenIdx].classList.add(chosenIdx === correct ? 'correct' : 'wrong');
+  if (chosenIdx !== correct) btns[correct].classList.add('correct');
+  document.getElementById(`exp-${qi}`).classList.add('show');
+  if (chosenIdx === correct) quizState.score++;
+  quizState.answered++;
+  document.getElementById('statAnswered').textContent = quizState.answered;
+  document.getElementById('statScore').textContent = quizState.score;
+  document.getElementById('quizScoreDisplay').textContent = `Score: ${quizState.score} / ${quizState.answered}`;
+}
+
+</script>
+</body>
+</html>

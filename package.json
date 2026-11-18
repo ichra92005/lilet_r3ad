@@ -1,17 +1,20 @@
 {
   "name": "lilet_r3ad",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "private": true,
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "node --test 'tests/*.test.js'",
+    "check": "npm run build && npm test"
   },
   "devDependencies": {
     "vite": "^8.3.6"
   },
   "dependencies": {
-    "@mlc-ai/web-llm": "^0.2.88"
+    "@mlc-ai/web-llm": "^0.2.88",
+    "@supabase/supabase-js": "^2.119.0"
   }
 }

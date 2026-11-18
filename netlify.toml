@@ -1,0 +1,15 @@
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    # Required for Web Workers and SharedArrayBuffer / WebGPU isolation where supported
+    Cross-Origin-Embedder-Policy = "credentialless"
+    Cross-Origin-Opener-Policy = "same-origin"
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
