@@ -39,10 +39,6 @@ function goGuest() {
   enterGuestMode();
   navigate("/dashboard");
 }
-function goLogin() {
-  navigate("/login");
-}
-
 /* ── build ─────────────────────────────────────────────────────── */
 export function renderLanding(container) {
   container.className = "screen landing-new";
@@ -77,7 +73,6 @@ export function renderLanding(container) {
   for (const { label, action } of [
     { label: "Features", action: () => document.getElementById("features")?.scrollIntoView({ behavior: "smooth" }) },
     { label: "Guest Space", action: goGuest },
-    { label: "Log in", action: goLogin },
   ]) {
     const btn = h("button", "landing-nav-link", { text: label, type: "button" });
     btn.addEventListener("click", action);
@@ -127,18 +122,9 @@ export function renderLanding(container) {
   getStartedBtn.innerHTML = `<span>Get Started</span>${arrowRightSvg}`;
   getStartedBtn.addEventListener("click", goGetStarted);
 
-  const guestBtn = h("button", "landing-btn-secondary", { text: "Or continue as a guest – no account needed!", type: "button" });
-  guestBtn.addEventListener("click", goGuest);
+  ctaBtns.appendChild(getStartedBtn);
 
-  ctaBtns.append(getStartedBtn, guestBtn);
-
-  const loginLine = h("p", "landing-login-line");
-  loginLine.innerHTML = `Already have an account? `;
-  const loginLink = h("button", "landing-login-link", { text: "Log in", type: "button" });
-  loginLink.addEventListener("click", goLogin);
-  loginLine.appendChild(loginLink);
-
-  ctaRow.append(ctaBtns, loginLine);
+  ctaRow.appendChild(ctaBtns);
   heroLeft.append(heroBadge, heroSubBadge, heroTitle, heroDesc, ctaRow);
 
   // Right column – mascot
@@ -275,11 +261,9 @@ stripActions.append(linkedIn, emailLink, contactBtn);
   const footerCredit = h("p", "landing-footer-credit", { text: "Made with ♡ by Ichrak Nour Elhouda Belkhla" });
 
   const footerLinks = h("div", "landing-footer-links");
-  const fLogin = h("button", "landing-footer-link", { text: "Log in", type: "button" });
-  fLogin.addEventListener("click", goLogin);
   const fGuest = h("button", "landing-footer-link", { text: "Guest Space", type: "button" });
   fGuest.addEventListener("click", goGuest);
-  footerLinks.append(fLogin, fGuest);
+  footerLinks.appendChild(fGuest);
 
   footerInner.append(footerBrand, footerCredit, footerLinks);
   footer.appendChild(footerInner);

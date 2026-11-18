@@ -382,36 +382,6 @@
   gap: 1rem;
 }
 
-.landing-login-line {
-  font-size: 0.875rem;
-  color: var(--muted);
-}
-
-.landing-login-link {
-  background: none;
-  border: none;
-  font-family: inherit;
-  font-weight: 600;
-  color: #1d4ed8;
-  cursor: pointer;
-  text-decoration: underline;
-  text-underline-offset: 4px;
-  padding: 0;
-  font-size: inherit;
-}
-
-[data-theme="dark"] .landing-login-link {
-  color: #60a5fa;
-}
-
-.landing-login-link:hover {
-  color: #1e3a8a;
-}
-
-[data-theme="dark"] .landing-login-link:hover {
-  color: #93c5fd;
-}
-
 .landing-hero-right {
   display: flex;
   align-items: center;

@@ -1,9 +1,3 @@
-/**
- * src/screens/dashboard.js
- * Dashboard screen (#/dashboard) — unified with the Lilet_r3ad landing page theme.
- * Layout: shared pastel backdrop + glassmorphic sidebar + top header + document workspace panel.
- * All text goes through textContent / el() — no innerHTML on user data.
- */
 
 import { navigate }                     from "../app/router.js";
 import { el, append, empty }            from "../utils/dom.js";
@@ -177,7 +171,7 @@ export function renderDashboard(container) {
   const bgDiv = el("div", { cls: "landing-bg", attrs: { "aria-hidden": "true" } });
   const bgImg = el("img", {
     cls: "landing-bg-img",
-    attrs: { src: "/assets/___3__26dcc747.jpeg", alt: "" },
+    attrs: { src: "/assets/aistudio/side.png", alt: "" },
   });
   bgImg.onerror = () => { bgImg.style.display = "none"; };
   const bgOverlay = el("div", { cls: "landing-bg-overlay" });
@@ -217,16 +211,16 @@ export function renderDashboard(container) {
 
   const logoWrap = el("a", {
     cls: "dash-sidebar-logo",
-    attrs: { href: "#/", "aria-label": "Lilet_r3ad Home" },
+    attrs: { href: "#/", "aria-label": "Lilet r3ad Home" },
   });
   const mascotImg = el("img", {
     cls: "dash-mascot-img",
     attrs: {
-      src: "/assets/Screenshot_2026-11-18_at_1.12.35_AM_4f655e17.png",
-      alt: "",
+      src: "/assets/aistudio/side.png",
+      alt: "Lilet3ad icon",
     },
   });
-  const logoText = el("span", { cls: "dash-logo-text", text: "Lilet_r3ad", dirAuto: false });
+  const logoText = el("span", { cls: "dash-logo-text", text: "Lilet Raad", dirAuto: false });
   append(logoWrap, mascotImg, logoText);
 
   // Nav
@@ -395,6 +389,16 @@ export function renderDashboard(container) {
     }
 
     const table = el("table", { cls: "dash-table", attrs: { role: "table" } });
+    const colgroup = el("colgroup");
+    append(
+      colgroup,
+      el("col", { cls: "dash-col dash-col--check" }),
+      el("col", { cls: "dash-col dash-col--title" }),
+      el("col", { cls: "dash-col dash-col--progress" }),
+      el("col", { cls: "dash-col dash-col--date" }),
+      el("col", { cls: "dash-col dash-col--actions" }),
+    );
+    table.appendChild(colgroup);
     const thead = el("thead");
     const thr   = el("tr", { cls: "dash-thead-row" });
 
@@ -804,9 +808,9 @@ export function renderDashboard(container) {
       attrs: { src: "/assets/Screenshot_2026-11-18_at_1.12.35_AM_4f655e17.png", alt: "Lilet_r3ad mascot" },
     });
 
-    const title = el("h2", { cls: "dash-about-title", text: "Lilet_r3ad" });
+    const title = el("h2", { cls: "dash-about-title", text: "Lilet Raad" });
     const desc  = el("p",  {
-      text: "Lilet_r3ad is a calm, privacy-first AI study helper that runs right in your browser — no external tracking and your study files stay on your device.",
+      text: "Lilet Raad is a calm, privacy first AI study helper that runs right in your browser   no external tracking and your study files stay on your device.",
     });
     const desc2 = el("p",  {
       text: "Upload a course PDF, DOCX, or TXT and your personal study partner will help explain key ideas, generate flashcards, and quiz you step by step.",
@@ -825,7 +829,7 @@ export function renderDashboard(container) {
       attrs: { type: "button" },
     });
     const { close } = createModal(document.body, {
-      title: "About Lilet_r3ad",
+      title: "About Lilet Raad",
       body: wrap,
       footerButtons: [closeBtn],
     });
@@ -883,7 +887,7 @@ export function renderDashboard(container) {
 
     const { close } = createModal(document.body, {
       title: "Leave feedback",
-      subtitle: "Help us make Lilet_r3ad better",
+      subtitle: "Help us make Lilet Raad better",
       body: [ratingLabel, ratingWrap, msgLabel, textarea],
       footerButtons: [cancelBtn, sendBtn],
     });

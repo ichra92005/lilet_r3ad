@@ -17,7 +17,6 @@ import { renderApp }       from "./screens/app.js";
 import { renderTeacher }   from "./screens/teacher.js";
 import { renderPath }      from "./screens/path.js";
 import { renderFinal }     from "./screens/final.js";
-import { renderLogin }     from "./screens/login.js";
 
 // Global error handler
 window.addEventListener("error", (event) => {
@@ -30,30 +29,8 @@ window.addEventListener("unhandledrejection", (event) => {
 // Boot the AI engine immediately in the background
 startLoading();
 
-// Initialize authentication before any screen is rendered
-import { initAuth, onAuthChange, getAuthState } from './lib/authProvider.js';
-
-// Define root container early
+// Root container
 const appContainer = document.getElementById("app");
-
-// Simple loading overlay while auth is being determined
-const loadingOverlay = document.createElement('div');
-loadingOverlay.className = 'loading-overlay';
-loadingOverlay.textContent = 'Loading…';
-loadingOverlay.style.cssText = 'position:fixed; inset:0; display:flex; align-items:center; justify-content:center; background:var(--bg); color:var(--text); font-family:var(--font-body); font-size:1.2rem; z-index:1000;';
-appContainer.appendChild(loadingOverlay);
-
-(async () => {
-  await initAuth();
-  // auth state is ready – remove loading overlay
-  loadingOverlay.remove();
-})();
-
-// Helper to decide if a route is protected (requires auth)
-function isProtected(route) {
-  const publicRoutes = ['/', '/login'];
-  return !publicRoutes.includes(route);
-}
 
 // Theme toggle initialization
 const savedTheme = localStorage.getItem("lilet_r3ad_theme");
@@ -118,13 +95,11 @@ append(appContainer, appHeader, screenOutlet);
 onRoute((route) => {
   empty(screenOutlet);
 
-  // Show header on screens 2-5, hide on landing, dashboard, and login
-  if (route === "/" || route === "" || route === "/dashboard" || route === "/login") {
+  // Hide app-header on landing & dashboard; show on content screens
+  if (route === "/" || route === "" || route === "/dashboard") {
     appHeader.style.display = "none";
     if (route === "/dashboard") {
       renderDashboard(screenOutlet);
-    } else if (route === "/login") {
-      renderLogin(screenOutlet);
     } else {
       renderLanding(screenOutlet);
     }

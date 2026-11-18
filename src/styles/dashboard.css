@@ -86,7 +86,30 @@
   -webkit-backdrop-filter: blur(20px) !important;
   border-right: 1px solid var(--border-soft) !important;
   box-sizing: border-box !important;
+  isolation: isolate;
   transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.dash-sidebar::before {
+  content: "";
+  position: absolute;
+  inset: -8px;
+  z-index: 0;
+  background:
+    linear-gradient(rgba(255, 255, 255, 0.62), rgba(255, 255, 255, 0.62)),
+    url("/assets/___3__26dcc747.jpeg") center / cover no-repeat;
+  filter: blur(6px);
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+[data-theme="dark"] .dash-sidebar::before {
+  opacity: 0.2;
+}
+
+.dash-sidebar > * {
+  position: relative;
+  z-index: 1;
 }
 
 /* Logo */
@@ -526,11 +549,21 @@
 }
 
 /* Column widths */
-.dash-th--check    { width: 48px; }
-.dash-th--title    { /* flex */ }
-.dash-th--progress { width: 190px; }
-.dash-th--date     { width: 160px; }
-.dash-th--actions  { width: 100px; }
+.dash-col--check,
+.dash-th--check,
+.dash-td--check { width: 48px; }
+.dash-col--title,
+.dash-th--title,
+.dash-td--title { width: 180px; }
+.dash-col--progress,
+.dash-th--progress,
+.dash-td--progress { width: 190px; }
+.dash-col--date,
+.dash-th--date,
+.dash-td--date { width: 160px; }
+.dash-col--actions,
+.dash-th--actions,
+.dash-td--actions { width: 100px; }
 
 /* Header row */
 .dash-thead-row {
