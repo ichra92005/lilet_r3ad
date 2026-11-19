@@ -12,13 +12,7 @@ import { el, append, empty } from "./utils/dom.js";
 import { getAuthState, initializeAuth, onAuthChange, signOut } from "./lib/authProvider.js";
 import { renderLogin } from "./screens/login.js";
 
-// Screens
-import { renderLanding }   from "./screens/landing.js";
-import { renderDashboard } from "./screens/dashboard.js";
-import { renderApp }       from "./screens/app.js";
-import { renderTeacher }   from "./screens/teacher.js";
-import { renderPath }      from "./screens/path.js";
-import { renderFinal }     from "./screens/final.js";
+import { renderLanding } from "./screens/landing.js";
 
 // Global error handler
 window.addEventListener("error", (event) => {
@@ -27,9 +21,6 @@ window.addEventListener("error", (event) => {
 window.addEventListener("unhandledrejection", (event) => {
   console.error("Global unhandled rejection:", event.reason);
 });
-
-// Boot the AI engine immediately in the background
-startLoading();
 
 // Root container
 const appContainer = document.getElementById("app");
@@ -110,7 +101,20 @@ empty(appContainer);
 append(appContainer, appHeader, screenOutlet);
 
 // Router Handler
+let renderGeneration = 0;
+
+function renderLazyScreen(loadScreen, exportName, generation) {
+  loadScreen().then((screen) => {
+    if (generation === renderGeneration) screen[exportName](screenOutlet);
+  }).catch((error) => {
+    if (generation !== renderGeneration) return;
+    console.error(`Screen load failed (${exportName}):`, error);
+    screenOutlet.textContent = `Unable to load this screen: ${error.message}`;
+  });
+}
+
 onRoute((route) => {
+  const generation = ++renderGeneration;
   const { user, initialized } = getAuthState();
   if (!initialized) return;
   if (route !== "/" && route !== "" && route !== "/login" && !user) {
@@ -122,12 +126,13 @@ onRoute((route) => {
     return;
   }
   empty(screenOutlet);
+  if (["/app", "/teacher", "/path", "/final"].includes(route)) startLoading();
 
   // Hide app-header on landing & dashboard; show on content screens
   if (route === "/" || route === "" || route === "/dashboard" || route === "/login") {
     appHeader.style.display = "none";
     if (route === "/dashboard") {
-      renderDashboard(screenOutlet);
+      renderLazyScreen(() => import("./screens/dashboard.js"), "renderDashboard", generation);
     } else if (route === "/login") {
       renderLogin(screenOutlet);
     } else {
@@ -137,19 +142,19 @@ onRoute((route) => {
     appHeader.style.display = "flex";
     switch (route) {
       case "/app":
-        renderApp(screenOutlet);
+        renderLazyScreen(() => import("./screens/app.js"), "renderApp", generation);
         break;
       case "/teacher":
-        renderTeacher(screenOutlet);
+        renderLazyScreen(() => import("./screens/teacher.js"), "renderTeacher", generation);
         break;
       case "/path":
-        renderPath(screenOutlet);
+        renderLazyScreen(() => import("./screens/path.js"), "renderPath", generation);
         break;
       case "/final":
-        renderFinal(screenOutlet);
+        renderLazyScreen(() => import("./screens/final.js"), "renderFinal", generation);
         break;
       default:
-        renderApp(screenOutlet);
+        renderLazyScreen(() => import("./screens/app.js"), "renderApp", generation);
         break;
     }
   }

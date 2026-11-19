@@ -16,7 +16,6 @@
  *   - All calls are serialized through the Web Worker.
  */
 
-import { CreateWebWorkerMLCEngine } from "@mlc-ai/web-llm";
 import { MODEL_ID } from "../app/config.js";
 
 // ── Internal State ────────────────────────────────────────────────────────────
@@ -79,6 +78,7 @@ export function startLoading() {
 
   (async () => {
     try {
+      const { CreateWebWorkerMLCEngine } = await import("@mlc-ai/web-llm");
       const worker = new Worker(
         new URL("./worker.js", import.meta.url),
         { type: "module" }
